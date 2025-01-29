@@ -164,6 +164,138 @@ class FlutterMetricReporter extends NavigatorObserver {
     ));
   }
 
+  String? _getRouteName(Route<dynamic>? route) {
+    if (route == null) return null;
+    // Try to get the most meaningful name for the route
+    return route.settings.name ??
+           (route.settings.arguments as Map<String, dynamic>?)?['path'] ??
+           route.toString();
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    debugPrint('FlutterMetricReporter: didPush - attempting to get route name');
+    super.didPush(route, previousRoute);
+    final routeName = _getRouteName(route);
+    debugPrint('FlutterMetricReporter: didPush with route name: $routeName');
+    if (routeName != null) {
+      final startTime = DateTime.now();
+      // Report initial page load metric
+      reportPerformanceMetric(
+        'page_load_start',
+        Duration.zero,
+        attributes: {
+          'route': routeName,
+          'from_route': _getRouteName(previousRoute),
+          'navigation_type': 'push',
+        },
+      );
+
+      // Add a post-frame callback to measure the actual render time
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final loadDuration = DateTime.now().difference(startTime);
+        reportPageLoad(
+          routeName,
+          loadDuration,
+          transitionType: 'push',
+          attributes: {
+            'from_route': _getRouteName(previousRoute),
+          },
+        );
+      });
+    }
+    _trackNavigation('push', route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    final routeName = _getRouteName(previousRoute);
+    debugPrint('FlutterMetricReporter: didPop with route name: $routeName');
+    super.didPop(route, previousRoute);
+    if (routeName != null) {
+      final startTime = DateTime.now();
+      // Report navigation metric
+      reportPerformanceMetric(
+        'page_transition_start',
+        Duration.zero,
+        attributes: {
+          'route': routeName,
+          'from_route': _getRouteName(route),
+          'navigation_type': 'pop',
+        },
+      );
+
+      // Measure transition completion
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final transitionDuration = DateTime.now().difference(startTime);
+        reportPageLoad(
+          routeName,
+          transitionDuration,
+          transitionType: 'pop',
+          attributes: {
+            'from_route': _getRouteName(route),
+          },
+        );
+      });
+    }
+    _trackNavigation('pop', previousRoute, route);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    final routeName = _getRouteName(newRoute);
+    debugPrint('FlutterMetricReporter: didReplace with route name: $routeName');
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    if (routeName != null) {
+      final startTime = DateTime.now();
+      reportPerformanceMetric(
+        'page_replace_start',
+        Duration.zero,
+        attributes: {
+          'route': routeName,
+          'from_route': _getRouteName(oldRoute),
+          'navigation_type': 'replace',
+        },
+      );
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final replaceDuration = DateTime.now().difference(startTime);
+        reportPageLoad(
+          routeName,
+          replaceDuration,
+          transitionType: 'replace',
+          attributes: {
+            'from_route': _getRouteName(oldRoute),
+          },
+        );
+      });
+    }
+    _trackNavigation('replace', newRoute, oldRoute);
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    final routeName = _getRouteName(previousRoute);
+    debugPrint('FlutterMetricReporter: didRemove with route name: $routeName');
+    super.didRemove(route, previousRoute);
+    _trackNavigation('remove', previousRoute, route);
+  }
+
+  void _trackNavigation(String type, Route<dynamic>? toRoute, Route<dynamic>? fromRoute) {
+    final toRouteName = _getRouteName(toRoute);
+    final fromRouteName = _getRouteName(fromRoute);
+    debugPrint('FlutterMetricReporter: Tracking navigation: $type from $fromRouteName to $toRouteName');
+
+    if (toRouteName != null || fromRouteName != null) {
+      _navigationController.add(NavigationMetric(
+        fromRoute: fromRouteName,
+        toRoute: toRouteName,
+        navigationType: type,
+      ));
+    }
+  }
+
+
   void reportUserInteraction(String screenName, String actionType, {
     Duration? responseTime,
     Map<String, dynamic>? attributes,
@@ -199,43 +331,6 @@ class FlutterMetricReporter extends NavigatorObserver {
       shiftScore: shiftScore,
       cause: cause,
       attributes: attributes,
-    ));
-  }
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    debugPrint('FlutterMetricReporter: didPush ${route.settings.name}');
-    super.didPush(route, previousRoute);
-    _trackNavigation('push', route, previousRoute);
-  }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    debugPrint('FlutterMetricReporter: didPop ${route.settings.name}');
-    super.didPop(route, previousRoute);
-    _trackNavigation('pop', previousRoute, route);
-  }
-
-  @override
-  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-    debugPrint('FlutterMetricReporter: didReplace ${newRoute?.settings.name}');
-    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
-    _trackNavigation('replace', newRoute, oldRoute);
-  }
-
-  @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    debugPrint('FlutterMetricReporter: didRemove ${route.settings.name}');
-    super.didRemove(route, previousRoute);
-    _trackNavigation('remove', previousRoute, route);
-  }
-
-  void _trackNavigation(String type, Route<dynamic>? toRoute, Route<dynamic>? fromRoute) {
-    debugPrint('FlutterMetricReporter: Tracking navigation: $type from ${fromRoute?.settings.name} to ${toRoute?.settings.name}');
-    _navigationController.add(NavigationMetric(
-      fromRoute: fromRoute?.settings.name,
-      toRoute: toRoute?.settings.name,
-      navigationType: type,
     ));
   }
 
