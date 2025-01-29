@@ -21,6 +21,7 @@ class ConsoleMetricsListener {
 
   ConsoleMetricsListener._internal() {
     _initializeTrackers();
+    print('ConsoleMetricsListener internal');
     _setupListeners();
   }
 

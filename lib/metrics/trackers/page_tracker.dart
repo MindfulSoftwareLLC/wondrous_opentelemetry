@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import '../flutter_metric_reporter.dart';
 
@@ -17,20 +18,24 @@ class PageTracker {
   late final FlutterMetricReporter _reporter;
 
   PageTracker._internal() {
+    debugPrint('PageTracker: Initializing...');
     _reporter = GetIt.I.get<FlutterMetricReporter>();
     
     _pageLoadSubscription = _reporter.pageLoadStream.listen((metric) {
+      debugPrint('PageTracker: Received page load metric');
       _processPageLoadMetric(metric);
       _notifyListeners(metric);
     });
 
     _navigationSubscription = _reporter.navigationStream.listen((metric) {
+      debugPrint('PageTracker: Received navigation metric for route: ${metric.toRoute}');
       if (metric.toRoute != null) {
         // Record the start time of navigation to calculate total transition time
         _navigationStartTimes[metric.toRoute!] = metric.timestamp;
 
         // If we have a fromRoute, we can calculate the transition duration
         if (metric.fromRoute != null) {
+          debugPrint('PageTracker: Processing navigation from ${metric.fromRoute} to ${metric.toRoute}');
           final lastLoadTime = _pageLoadHistory[metric.fromRoute]?.lastOrNull;
           if (lastLoadTime != null) {
             // Report the complete navigation duration for the previous page
@@ -59,9 +64,11 @@ class PageTracker {
         );
       }
     });
+    debugPrint('PageTracker: Initialization complete');
   }
 
   void _processPageLoadMetric(PageLoadMetric metric) {
+    debugPrint('PageTracker: Processing page load metric for ${metric.pageName}');
     if (!_pageLoadHistory.containsKey(metric.pageName)) {
       _pageLoadHistory[metric.pageName] = [];
     }
@@ -71,6 +78,7 @@ class PageTracker {
     final navigationStart = _navigationStartTimes[metric.pageName];
     if (navigationStart != null) {
       final totalTransitionTime = metric.timestamp.difference(navigationStart);
+      debugPrint('PageTracker: Calculated total transition time: ${totalTransitionTime.inMilliseconds}ms');
       _reporter.reportPerformanceMetric(
         'total_page_transition',
         totalTransitionTime,
@@ -109,6 +117,7 @@ class PageTracker {
   }
 
   void addListener(PageMetricListener listener) {
+    debugPrint('PageTracker: Adding listener');
     _listeners.add(listener);
   }
 
@@ -117,6 +126,7 @@ class PageTracker {
   }
 
   void _notifyListeners(PageLoadMetric metric) {
+    debugPrint('PageTracker: Notifying ${_listeners.length} listeners');
     for (final listener in _listeners) {
       listener(metric);
     }

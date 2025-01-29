@@ -110,7 +110,9 @@ class FlutterMetricReporter extends NavigatorObserver {
   static final FlutterMetricReporter _instance = FlutterMetricReporter._internal();
   factory FlutterMetricReporter() => _instance;
 
-  FlutterMetricReporter._internal();
+  FlutterMetricReporter._internal() {
+    debugPrint('FlutterMetricReporter: Initializing...');
+  }
 
   // Stream controllers for each metric type
   final _performanceController = StreamController<PerformanceMetric>.broadcast();
@@ -131,17 +133,20 @@ class FlutterMetricReporter extends NavigatorObserver {
   Stream<LayoutShiftMetric> get layoutShiftStream => _layoutShiftController.stream;
 
   void reportPerformanceMetric(String name, Duration duration, {Map<String, dynamic>? attributes}) {
-    _performanceController.add(PerformanceMetric(
+    debugPrint('FlutterMetricReporter: Reporting performance metric: $name');
+    final metric = PerformanceMetric(
       name: name,
       duration: duration,
       attributes: attributes,
-    ));
+    );
+    _performanceController.add(metric);
   }
 
   void reportPageLoad(String pageName, Duration loadTime, {
     String? transitionType,
     Map<String, dynamic>? attributes,
   }) {
+    debugPrint('FlutterMetricReporter: Reporting page load: $pageName');
     _pageLoadController.add(PageLoadMetric(
       pageName: pageName,
       loadTime: loadTime,
@@ -151,6 +156,7 @@ class FlutterMetricReporter extends NavigatorObserver {
   }
 
   void reportError(String error, {StackTrace? stackTrace, Map<String, dynamic>? attributes}) {
+    debugPrint('FlutterMetricReporter: Reporting error: $error');
     _errorController.add(ErrorMetric(
       error: error,
       stackTrace: stackTrace,
@@ -162,6 +168,7 @@ class FlutterMetricReporter extends NavigatorObserver {
     Duration? responseTime,
     Map<String, dynamic>? attributes,
   }) {
+    debugPrint('FlutterMetricReporter: Reporting user interaction: $screenName - $actionType');
     _interactionController.add(UserInteractionMetric(
       screenName: screenName,
       actionType: actionType,
@@ -173,6 +180,7 @@ class FlutterMetricReporter extends NavigatorObserver {
   void reportPaint(String componentName, Duration paintDuration, String paintType, {
     Map<String, dynamic>? attributes,
   }) {
+    debugPrint('FlutterMetricReporter: Reporting paint: $componentName - $paintType');
     _paintController.add(PaintMetric(
       componentName: componentName,
       paintDuration: paintDuration,
@@ -185,6 +193,7 @@ class FlutterMetricReporter extends NavigatorObserver {
     String? cause,
     Map<String, dynamic>? attributes,
   }) {
+    debugPrint('FlutterMetricReporter: Reporting layout shift: $componentName');
     _layoutShiftController.add(LayoutShiftMetric(
       componentName: componentName,
       shiftScore: shiftScore,
@@ -195,29 +204,34 @@ class FlutterMetricReporter extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    debugPrint('FlutterMetricReporter: didPush ${route.settings.name}');
     super.didPush(route, previousRoute);
     _trackNavigation('push', route, previousRoute);
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    debugPrint('FlutterMetricReporter: didPop ${route.settings.name}');
     super.didPop(route, previousRoute);
     _trackNavigation('pop', previousRoute, route);
   }
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    debugPrint('FlutterMetricReporter: didReplace ${newRoute?.settings.name}');
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     _trackNavigation('replace', newRoute, oldRoute);
   }
 
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    debugPrint('FlutterMetricReporter: didRemove ${route.settings.name}');
     super.didRemove(route, previousRoute);
     _trackNavigation('remove', previousRoute, route);
   }
 
   void _trackNavigation(String type, Route<dynamic>? toRoute, Route<dynamic>? fromRoute) {
+    debugPrint('FlutterMetricReporter: Tracking navigation: $type from ${fromRoute?.settings.name} to ${toRoute?.settings.name}');
     _navigationController.add(NavigationMetric(
       fromRoute: fromRoute?.settings.name,
       toRoute: toRoute?.settings.name,
@@ -226,6 +240,7 @@ class FlutterMetricReporter extends NavigatorObserver {
   }
 
   void dispose() {
+    debugPrint('FlutterMetricReporter: Disposing...');
     _performanceController.close();
     _pageLoadController.close();
     _errorController.close();
