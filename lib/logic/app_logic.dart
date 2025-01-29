@@ -42,6 +42,7 @@ class AppLogic {
 
     if (kIsWeb) {
       // SB: This is intentionally not a debugPrint, as it's a message for users who open the console on web.
+      // ignore: avoid_print
       print(
         '''Thanks for checking out Wonderous on the web!
         If you encounter any issues please report them at https://github.com/gskinnerTeam/flutter-wonderous-app/issues.''',

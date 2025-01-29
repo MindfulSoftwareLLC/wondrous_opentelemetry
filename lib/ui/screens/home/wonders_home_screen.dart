@@ -12,6 +12,8 @@ import 'package:wonders/ui/wonder_illustrations/common/animated_clouds.dart';
 import 'package:wonders/ui/wonder_illustrations/common/wonder_illustration.dart';
 import 'package:wonders/ui/wonder_illustrations/common/wonder_illustration_config.dart';
 import 'package:wonders/ui/wonder_illustrations/common/wonder_title_text.dart';
+import 'package:wonders/metrics/performance_overlay_widget.dart';
+import 'package:wonders/metrics/flutter_metric_reporter.dart';
 
 part '_vertical_swipe_controller.dart';
 part 'widgets/_animated_arrow_button.dart';
@@ -27,8 +29,10 @@ class HomeScreen extends StatefulWidget with GetItStatefulWidgetMixin {
 /// arranged in a parallax style.
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late final PageController _pageController;
+  final FlutterMetricReporter _metricReporter = FlutterMetricReporter();
   List<WonderData> get _wonders => wondersLogic.all;
   bool _isMenuOpen = false;
+  final _pageLoadStartTime = DateTime.now();
 
   /// Set initial wonderIndex
   late int _wonderIndex = 0;
@@ -60,27 +64,40 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final initialPage = _numWonders * 100 + _wonderIndex;
     // Create page controller,
     _pageController = PageController(viewportFraction: 1, initialPage: initialPage);
+
+    // Report initial load time
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final loadDuration = DateTime.now().difference(_pageLoadStartTime);
+      _metricReporter.reportPerformanceMetric(
+        'home_screen_initial_load',
+        loadDuration,
+        attributes: {'wonder_index': _wonderIndex},
+      );
+    });
   }
 
-  void _handlePageChanged(value) {
-    final newIndex = value % _numWonders;
-    if (newIndex == _wonderIndex) {
-      return; // Exit early if we're already on this page
-    }
-    setState(() {
-      _wonderIndex = newIndex;
-      settingsLogic.prevWonderIndex.value = _wonderIndex;
-    });
-    AppHaptics.lightImpact();
-  }
 
   void _handleOpenMenuPressed() async {
+    final menuOpenTime = DateTime.now();
     setState(() => _isMenuOpen = true);
+
     WonderType? pickedWonder = await appLogic.showFullscreenDialogRoute<WonderType>(
       context,
       HomeMenu(data: currentWonder),
       transparent: true,
     );
+
+    // Report menu metrics
+    final menuDuration = DateTime.now().difference(menuOpenTime);
+    _metricReporter.reportPerformanceMetric(
+      'menu_interaction_time',
+      menuDuration,
+      attributes: {
+        'wonder_selected': pickedWonder?.toString(),
+        'had_selection': pickedWonder != null,
+      },
+    );
+
     setState(() => _isMenuOpen = false);
     if (pickedWonder != null) {
       _setPageIndex(_wonders.indexWhere((w) => w.type == pickedWonder));
@@ -101,16 +118,43 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     // To support infinite scrolling, we can't jump directly to the pressed index. Instead, make it relative to our current position.
     final pos = ((_pageController.page ?? 0) / _numWonders).floor() * _numWonders;
     final newIndex = pos + index;
-    if (animate == true) {
-      _pageController.animateToPage(newIndex, duration: $styles.times.med, curve: Curves.easeOutCubic);
+
+    final startTime = DateTime.now();
+    void reportTransitionMetrics() {
+      final duration = DateTime.now().difference(startTime);
+      _metricReporter.reportPerformanceMetric(
+        'wonder_transition',
+        duration,
+        attributes: {
+          'animated': animate,
+          'from_index': _wonderIndex,
+          'to_index': index,
+        },
+      );
+    }
+
+    if (animate) {
+      _pageController
+          .animateToPage(newIndex, duration: $styles.times.med, curve: Curves.easeOutCubic)
+          .then((_) => reportTransitionMetrics());
     } else {
       _pageController.jumpToPage(newIndex);
+      reportTransitionMetrics();
     }
   }
 
   void _showDetailsPage() async {
+    final detailsStartTime = DateTime.now();
     _swipeOverride = _swipeController.swipeAmt.value;
     context.go(ScreenPaths.wonderDetails(currentWonder.type, tabIndex: 0));
+
+    // Report transition metrics
+    _metricReporter.reportPerformanceMetric(
+      'show_details_transition',
+      DateTime.now().difference(detailsStartTime),
+      attributes: {'wonder': currentWonder.title},
+    );
+
     await Future.delayed(100.ms);
     _swipeOverride = null;
     _fadeInOnNextBuild = true;
@@ -127,45 +171,47 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       }
     } on Exception catch (e) {
       debugPrint(e.toString());
+      _metricReporter.reportError(
+        'Fade animation error',
+        stackTrace: null,
+        attributes: {'error': e.toString()},
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_fadeInOnNextBuild == true) {
+    if (_fadeInOnNextBuild) {
       _startDelayedFgFade();
       _fadeInOnNextBuild = false;
     }
 
-    return _swipeController.wrapGestureDetector(Container(
-      color: $styles.colors.black,
-      child: PreviousNextNavigation(
-        listenToMouseWheel: false,
-        onPreviousPressed: () => _handlePrevNext(-1),
-        onNextPressed: () => _handlePrevNext(1),
-        child: Stack(
-          children: [
-            /// Background
-            ..._buildBgAndClouds(),
+    return PerformanceOverlayWidget(
+      componentName: 'HomeScreen',
+      child: _swipeController.wrapGestureDetector(Container(
+        color: $styles.colors.black,
+        child: PreviousNextNavigation(
+          listenToMouseWheel: false,
+          onPreviousPressed: () => _handlePrevNext(-1),
+          onNextPressed: () => _handlePrevNext(1),
+          child: Stack(
+            children: [
+              /// Background
+              ..._buildBgAndClouds(),
 
-            /// Wonders Illustrations (main content)
-            _buildMgPageView(),
+              /// Wonders Illustrations (main content)
+              _buildMgPageView(),
 
-            /// Foreground illustrations and gradients
-            _buildFgAndGradients(),
+              /// Foreground illustrations and gradients
+              _buildFgAndGradients(),
 
-            /// Controls that float on top of the various illustrations
-            _buildFloatingUi(),
-          ],
-        ).animate().fadeIn(),
-      ),
-    ));
-  }
-
-  @override
-  void dispose() {
-    _swipeController.dispose();
-    super.dispose();
+              /// Controls that float on top of the various illustrations
+              _buildFloatingUi(),
+            ],
+          ).animate().fadeIn(),
+        ),
+      )),
+    );
   }
 
   Widget _buildMgPageView() {
@@ -177,16 +223,245 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           final wonder = _wonders[index % _wonders.length];
           final wonderType = wonder.type;
           bool isShowing = _isSelected(wonderType);
-          return _swipeController.buildListener(
-            builder: (swipeAmt, _, child) {
-              final config = WonderIllustrationConfig.mg(
-                isShowing: isShowing,
-                zoom: .05 * swipeAmt,
-              );
-              return WonderIllustration(wonderType, config: config);
-            },
+          return PerformanceOverlayWidget(
+            componentName: 'WonderPageView-${wonder.title}',
+            child: _swipeController.buildListener(
+              builder: (swipeAmt, _, child) {
+                final config = WonderIllustrationConfig.mg(
+                  isShowing: isShowing,
+                  zoom: .05 * swipeAmt,
+                );
+                return WonderIllustration(wonderType, config: config);
+              },
+            ),
           );
         },
+      ),
+    );
+  }
+
+
+
+  Widget _buildFloatingUi() {
+    return Stack(children: [
+
+      /// Floating controls / UI
+      AnimatedSwitcher(
+        duration: $styles.times.fast,
+        child: AnimatedOpacity(
+          opacity: _isMenuOpen ? 0 : 1,
+          duration: $styles.times.med,
+          child: RepaintBoundary(
+            child: OverflowBox(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(width: double.infinity),
+                  const Spacer(),
+
+                  /// Title Content
+                  LightText(
+                    child: IgnorePointer(
+                      ignoringSemantics: false,
+                      child: Transform.translate(
+                        offset: Offset(0, 30),
+                        child: Column(
+                          children: [
+                            Semantics(
+                              liveRegion: true,
+                              button: true,
+                              header: true,
+                              onIncrease: () => _setPageIndex(_wonderIndex + 1),
+                              onDecrease: () => _setPageIndex(_wonderIndex - 1),
+                              onTap: () => _showDetailsPage(),
+                              // Hide the title when the menu is open for visual polish
+                              child: WonderTitleText(
+                                  currentWonder, enableShadows: true),
+                            ),
+                            Gap($styles.insets.md),
+                            AppPageIndicator(
+                              count: _numWonders,
+                              controller: _pageController,
+                              color: $styles.colors.white,
+                              dotSize: 8,
+                              onDotPressed: _handlePageIndicatorDotPressed,
+                              semanticPageTitle: $strings.homeSemanticWonder,
+                            ),
+                            Gap($styles.insets.md),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  /// Animated arrow and background
+                  /// Wrap in a container that is full-width to make it easier to find for screen readers
+                  Container(
+                    width: double.infinity,
+                    alignment: Alignment.center,
+
+                    /// Lose state of child objects when index changes, this will re-run all the animated switcher and the arrow anim
+                    key: ValueKey(_wonderIndex),
+                    child: Stack(
+                      children: [
+
+                        /// Expanding rounded rect that grows in height as user swipes up
+                        Positioned.fill(
+                            child: _swipeController.buildListener(
+                              builder: (swipeAmt, _, child) {
+                                double heightFactor = .5 +
+                                    .5 * (1 + swipeAmt * 4);
+                                return FractionallySizedBox(
+                                  alignment: Alignment.bottomCenter,
+                                  heightFactor: heightFactor,
+                                  child: Opacity(
+                                      opacity: swipeAmt * .5, child: child),
+                                );
+                              },
+                              child: VtGradient(
+                                [
+                                  $styles.colors.white.withOpacity(0),
+                                  $styles.colors.white.withOpacity(1)
+                                ],
+                                const [.3, 1],
+                                borderRadius: BorderRadius.circular(99),
+                              ),
+                            )),
+
+                        /// Arrow Btn that fades in and out
+                        _AnimatedArrowButton(onTap: _showDetailsPage,
+                            semanticTitle: currentWonder.title),
+                      ],
+                    ),
+                  ),
+                  Gap($styles.insets.md),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+
+      /// Menu Btn
+      TopLeft(
+        child: AnimatedOpacity(
+          duration: $styles.times.fast,
+          opacity: _isMenuOpen ? 0 : 1,
+          child: AppHeader(
+            backIcon: AppIcons.menu,
+            backBtnSemantics: $strings.homeSemanticOpenMain,
+            onBack: _handleOpenMenuPressed,
+            isTransparent: true,
+          ),
+        ),
+      ),
+    ]);
+  }
+
+  void _handlePageChanged(value) {
+    final newIndex = value % _numWonders;
+    if (newIndex == _wonderIndex) {
+      return; // Exit early if we're already on this page
+    }
+    setState(() {
+      _wonderIndex = newIndex;
+      settingsLogic.prevWonderIndex.value = _wonderIndex;
+    });
+
+    // Report page change metrics
+    _metricReporter.reportUserInteraction(
+      'home_screen',
+      'wonder_change',
+      attributes: {
+        'from_wonder': _wonders[_wonderIndex].title,
+        'to_wonder': _wonders[newIndex].title,
+      },
+    );
+
+    AppHaptics.lightImpact();
+  }
+
+  Widget _buildTitleContent() {
+    return PerformanceOverlayWidget(
+      componentName: 'HomeTitleContent',
+      child: LightText(
+        child: IgnorePointer(
+          ignoringSemantics: false,
+          child: Transform.translate(
+            offset: Offset(0, 30),
+            child: Column(
+              children: [
+                Semantics(
+                  liveRegion: true,
+                  button: true,
+                  header: true,
+                  onIncrease: () => _setPageIndex(_wonderIndex + 1),
+                  onDecrease: () => _setPageIndex(_wonderIndex - 1),
+                  onTap: () => _showDetailsPage(),
+                  child: WonderTitleText(currentWonder, enableShadows: true),
+                ),
+                Gap($styles.insets.md),
+                AppPageIndicator(
+                  count: _numWonders,
+                  controller: _pageController,
+                  color: $styles.colors.white,
+                  dotSize: 8,
+                  onDotPressed: _handlePageIndicatorDotPressed,
+                  semanticPageTitle: $strings.homeSemanticWonder,
+                ),
+                Gap($styles.insets.md),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnimatedArrow() {
+    return PerformanceOverlayWidget(
+      componentName: 'HomeAnimatedArrow',
+      child: Container(
+        width: double.infinity,
+        alignment: Alignment.center,
+        key: ValueKey(_wonderIndex),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: _swipeController.buildListener(
+                builder: (swipeAmt, _, child) {
+                  double heightFactor = .5 + .5 * (1 + swipeAmt * 4);
+                  return FractionallySizedBox(
+                    alignment: Alignment.bottomCenter,
+                    heightFactor: heightFactor,
+                    child: Opacity(opacity: swipeAmt * .5, child: child),
+                  );
+                },
+                child: VtGradient(
+                  [$styles.colors.white.withOpacity(0), $styles.colors.white.withOpacity(1)],
+                  const [.3, 1],
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
+            ),
+            _AnimatedArrowButton(onTap: _showDetailsPage, semanticTitle: currentWonder.title),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuButton() {
+    return TopLeft(
+      child: AnimatedOpacity(
+        duration: $styles.times.fast,
+        opacity: _isMenuOpen ? 0 : 1,
+        child: AppHeader(
+          backIcon: AppIcons.menu,
+          backBtnSemantics: $strings.homeSemanticOpenMain,
+          onBack: _handleOpenMenuPressed,
+          isTransparent: true,
+        ),
       ),
     );
   }
@@ -246,8 +521,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             zoom: .4 * (_swipeOverride ?? swipeAmt),
           );
           return Animate(
-              effects: const [FadeEffect()],
-              onPlay: _handleFadeAnimInit,
+            effects: const [FadeEffect()],
+            onPlay: _handleFadeAnimInit,
               child: IgnorePointer(child: WonderIllustration(e.type, config: config)));
         });
       }),
@@ -259,110 +534,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     ]);
   }
 
-  Widget _buildFloatingUi() {
-    return Stack(children: [
-      /// Floating controls / UI
-      AnimatedSwitcher(
-        duration: $styles.times.fast,
-        child: AnimatedOpacity(
-          opacity: _isMenuOpen ? 0 : 1,
-          duration: $styles.times.med,
-          child: RepaintBoundary(
-            child: OverflowBox(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(width: double.infinity),
-                  const Spacer(),
-
-                  /// Title Content
-                  LightText(
-                    child: IgnorePointer(
-                      ignoringSemantics: false,
-                      child: Transform.translate(
-                        offset: Offset(0, 30),
-                        child: Column(
-                          children: [
-                            Semantics(
-                              liveRegion: true,
-                              button: true,
-                              header: true,
-                              onIncrease: () => _setPageIndex(_wonderIndex + 1),
-                              onDecrease: () => _setPageIndex(_wonderIndex - 1),
-                              onTap: () => _showDetailsPage(),
-                              // Hide the title when the menu is open for visual polish
-                              child: WonderTitleText(currentWonder, enableShadows: true),
-                            ),
-                            Gap($styles.insets.md),
-                            AppPageIndicator(
-                              count: _numWonders,
-                              controller: _pageController,
-                              color: $styles.colors.white,
-                              dotSize: 8,
-                              onDotPressed: _handlePageIndicatorDotPressed,
-                              semanticPageTitle: $strings.homeSemanticWonder,
-                            ),
-                            Gap($styles.insets.md),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  /// Animated arrow and background
-                  /// Wrap in a container that is full-width to make it easier to find for screen readers
-                  Container(
-                    width: double.infinity,
-                    alignment: Alignment.center,
-
-                    /// Lose state of child objects when index changes, this will re-run all the animated switcher and the arrow anim
-                    key: ValueKey(_wonderIndex),
-                    child: Stack(
-                      children: [
-                        /// Expanding rounded rect that grows in height as user swipes up
-                        Positioned.fill(
-                            child: _swipeController.buildListener(
-                          builder: (swipeAmt, _, child) {
-                            double heightFactor = .5 + .5 * (1 + swipeAmt * 4);
-                            return FractionallySizedBox(
-                              alignment: Alignment.bottomCenter,
-                              heightFactor: heightFactor,
-                              child: Opacity(opacity: swipeAmt * .5, child: child),
-                            );
-                          },
-                          child: VtGradient(
-                            [$styles.colors.white.withOpacity(0), $styles.colors.white.withOpacity(1)],
-                            const [.3, 1],
-                            borderRadius: BorderRadius.circular(99),
-                          ),
-                        )),
-
-                        /// Arrow Btn that fades in and out
-                        _AnimatedArrowButton(onTap: _showDetailsPage, semanticTitle: currentWonder.title),
-                      ],
-                    ),
-                  ),
-                  Gap($styles.insets.md),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-
-      /// Menu Btn
-      TopLeft(
-        child: AnimatedOpacity(
-          duration: $styles.times.fast,
-          opacity: _isMenuOpen ? 0 : 1,
-          child: AppHeader(
-            backIcon: AppIcons.menu,
-            backBtnSemantics: $strings.homeSemanticOpenMain,
-            onBack: _handleOpenMenuPressed,
-            isTransparent: true,
-          ),
-        ),
-      ),
-    ]);
+  @override
+  void dispose() {
+    _swipeController.dispose();
+    super.dispose();
   }
 }

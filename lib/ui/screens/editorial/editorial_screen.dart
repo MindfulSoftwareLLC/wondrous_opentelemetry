@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:drop_cap_text/drop_cap_text.dart';
 import 'package:flutter/rendering.dart';
@@ -25,6 +26,7 @@ import 'package:wonders/ui/common/utils/context_utils.dart';
 import 'package:wonders/ui/wonder_illustrations/common/wonder_illustration.dart';
 import 'package:wonders/ui/wonder_illustrations/common/wonder_illustration_config.dart';
 import 'package:wonders/ui/wonder_illustrations/common/wonder_title_text.dart';
+import 'package:wonders/ui/screens/wonder_details/widgets/wonder_weather.dart';
 
 part 'widgets/_app_bar.dart';
 part 'widgets/_callout.dart';
@@ -75,6 +77,7 @@ class _WonderEditorialScreenState extends State<WonderEditorialScreen> {
       /// Attempt to maintain a similar aspect ratio for the image within the app-bar
       double maxAppBarHeight = min(context.widthPx, $styles.sizes.maxContentWidth1) * 1.2;
       final backBtnAlign = appLogic.shouldUseNavRail() ? Alignment.topRight : Alignment.topLeft;
+      
       return PopRouterOnOverScroll(
         controller: _scroller,
         child: ColoredBox(
@@ -137,7 +140,21 @@ class _WonderEditorialScreenState extends State<WonderEditorialScreen> {
                                     child: Opacity(opacity: opacity, child: child),
                                   );
                                 },
-                                child: _TitleText(widget.data, scroller: _scroller),
+                                child: Column(
+                                  children: [
+                                    _TitleText(widget.data, scroller: _scroller),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: $styles.insets.md,
+                                        vertical: $styles.insets.sm,
+                                      ),
+                                      child: CenteredBox(
+                                        width: $styles.sizes.maxContentWidth1,
+                                        child: WonderWeather(data: widget.data),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
 
@@ -159,8 +176,11 @@ class _WonderEditorialScreenState extends State<WonderEditorialScreen> {
                               ),
                             ),
 
-                            /// Editorial content (text and images)
-                            _ScrollingContent(widget.data, scrollPos: _scrollPos, sectionNotifier: _sectionIndex),
+                            _ScrollingContent(
+                              widget.data,
+                              scrollPos: _scrollPos,
+                              sectionNotifier: _sectionIndex,
+                            ),
                           ],
                         ),
                       ),
@@ -183,10 +203,13 @@ class _WonderEditorialScreenState extends State<WonderEditorialScreen> {
                   alignment: backBtnAlign,
                   child: Padding(
                     padding: EdgeInsets.all($styles.insets.sm),
-                    child: BackBtn(icon: AppIcons.north, onPressed: _handleBackPressed),
+                    child: BackBtn(
+                      icon: AppIcons.north,
+                      onPressed: _handleBackPressed,
+                    ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),

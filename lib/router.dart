@@ -75,7 +75,7 @@ final appRouter = GoRouter(
           return WondersAppScaffold(child: navigator);
         },
         routes: [
-          AppRoute(ScreenPaths.splash, (_) => Container(color: $styles.colors.greyStrong)), // This will be hidden
+          AppRoute(ScreenPaths.splash, (_) => Container(color: $styles.colors.greyStrong)),
           AppRoute(ScreenPaths.intro, (_) => IntroScreen()),
           AppRoute(ScreenPaths.home, (_) => HomeScreen(), routes: [
             _timelineRoute,
@@ -165,7 +165,7 @@ String? _handleRedirect(BuildContext context, GoRouterState state) {
     debugPrint('Redirecting from ${state.uri.path} to ${ScreenPaths.home}');
     return ScreenPaths.home;
   }
-  if (!kIsWeb) debugPrint('Navigate to: ${state.uri}');
+  if (!kIsWeb) debugPrint('Navigate to uri: ${state.uri}');
   return null; // do nothing
 }
 

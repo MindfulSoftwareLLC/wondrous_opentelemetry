@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import '../flutter_metric_reporter.dart';
 
@@ -12,7 +12,7 @@ class PageTracker {
   final Map<String, List<Duration>> _pageLoadHistory = {};
   final List<PageMetricListener> _listeners = [];
   final Map<String, DateTime> _navigationStartTimes = {};
-  
+
   late final StreamSubscription<PageLoadMetric> _pageLoadSubscription;
   late final StreamSubscription<NavigationMetric> _navigationSubscription;
   late final FlutterMetricReporter _reporter;
@@ -20,7 +20,7 @@ class PageTracker {
   PageTracker._internal() {
     debugPrint('PageTracker: Initializing...');
     _reporter = GetIt.I.get<FlutterMetricReporter>();
-    
+
     _pageLoadSubscription = _reporter.pageLoadStream.listen((metric) {
       debugPrint('PageTracker: Received page load metric');
       _processPageLoadMetric(metric);
