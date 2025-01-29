@@ -12,17 +12,21 @@ import 'package:wonders/logic/timeline_logic.dart';
 import 'package:wonders/logic/unsplash_logic.dart';
 import 'package:wonders/logic/wonders_logic.dart';
 import 'package:wonders/ui/common/app_shortcuts.dart';
+import 'package:wonders/metrics/metrics_service.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  // Keep native splash screen up until app is finished bootstrapping
   if (!kIsWeb) {
     FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   }
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
-  // Start app
+  // Initialize services
   registerSingletons();
+  MetricsService.initialize();
+
+  // Verify metrics system
+  MetricsService.debugPrintMetricsStatus();
 
   runApp(WondersApp());
   await appLogic.bootstrap();
@@ -46,6 +50,12 @@ class _WondersAppState extends State<WondersApp> with GetItStateMixin {
       appLogic.precacheWonderImages(context);
     }
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    MetricsService.dispose();
+    super.dispose();
   }
 
   @override
