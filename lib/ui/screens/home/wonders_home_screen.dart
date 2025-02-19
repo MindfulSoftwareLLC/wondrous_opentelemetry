@@ -1,3 +1,5 @@
+import 'package:flutterrific_opentelemetry/metrics/flutter_metric_reporter.dart';
+import 'package:flutterrific_opentelemetry/metrics/metric_collector.dart';
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/logic/data/wonder_data.dart';
 import 'package:wonders/ui/common/app_icons.dart';
@@ -12,8 +14,6 @@ import 'package:wonders/ui/wonder_illustrations/common/animated_clouds.dart';
 import 'package:wonders/ui/wonder_illustrations/common/wonder_illustration.dart';
 import 'package:wonders/ui/wonder_illustrations/common/wonder_illustration_config.dart';
 import 'package:wonders/ui/wonder_illustrations/common/wonder_title_text.dart';
-import 'package:wonders/metrics/performance_overlay_widget.dart';
-import 'package:wonders/metrics/flutter_metric_reporter.dart';
 
 part '_vertical_swipe_controller.dart';
 part 'widgets/_animated_arrow_button.dart';
@@ -66,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _pageController = PageController(viewportFraction: 1, initialPage: initialPage);
 
     // Report initial load time
+    //TODO -far simper api
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final loadDuration = DateTime.now().difference(_pageLoadStartTime);
       _metricReporter.reportPerformanceMetric(
@@ -186,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       _fadeInOnNextBuild = false;
     }
 
-    return PerformanceOverlayWidget(
+    return MetricCollector(
       componentName: 'HomeScreen',
       child: _swipeController.wrapGestureDetector(Container(
         color: $styles.colors.black,
@@ -223,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           final wonder = _wonders[index % _wonders.length];
           final wonderType = wonder.type;
           bool isShowing = _isSelected(wonderType);
-          return PerformanceOverlayWidget(
+          return MetricCollector(
             componentName: 'WonderPageView-${wonder.title}',
             child: _swipeController.buildListener(
               builder: (swipeAmt, _, child) {
@@ -382,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildTitleContent() {
-    return PerformanceOverlayWidget(
+    return MetricCollector(
       componentName: 'HomeTitleContent',
       child: LightText(
         child: IgnorePointer(
@@ -419,7 +420,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildAnimatedArrow() {
-    return PerformanceOverlayWidget(
+    return MetricCollector(
       componentName: 'HomeAnimatedArrow',
       child: Container(
         width: double.infinity,
@@ -521,8 +522,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             zoom: .4 * (_swipeOverride ?? swipeAmt),
           );
           return Animate(
-            effects: const [FadeEffect()],
-            onPlay: _handleFadeAnimInit,
+              effects: const [FadeEffect()],
+              onPlay: _handleFadeAnimInit,
               child: IgnorePointer(child: WonderIllustration(e.type, config: config)));
         });
       }),

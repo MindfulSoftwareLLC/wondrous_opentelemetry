@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutterrific_opentelemetry/metrics/flutter_metric_reporter.dart';
 import 'package:wonders/common_libs.dart';
-import 'package:wonders/metrics/flutter_metric_reporter.dart';
 import 'package:wonders/ui/common/modals//fullscreen_video_viewer.dart';
 import 'package:wonders/ui/common/modals/fullscreen_maps_viewer.dart';
 import 'package:wonders/ui/screens/artifact/artifact_details/artifact_details_screen.dart';
@@ -43,21 +43,21 @@ class ScreenPaths {
 
 // Routes that are used multiple times
 AppRoute get _artifactRoute => AppRoute(
-      'artifact/:artifactId',
+  'artifact/:artifactId',
       (s) => ArtifactDetailsScreen(artifactId: s.pathParameters['artifactId']!),
-    );
+);
 
 AppRoute get _timelineRoute {
   return AppRoute(
     'timeline',
-    (s) => TimelineScreen(type: _tryParseWonderType(s.uri.queryParameters['type']!)),
+        (s) => TimelineScreen(type: _tryParseWonderType(s.uri.queryParameters['type']!)),
   );
 }
 
 AppRoute get _collectionRoute {
   return AppRoute(
     'collection',
-    (s) => CollectionScreen(fromId: s.uri.queryParameters['id'] ?? ''),
+        (s) => CollectionScreen(fromId: s.uri.queryParameters['id'] ?? ''),
     routes: [_artifactRoute],
   );
 }
@@ -82,7 +82,7 @@ final appRouter = GoRouter(
             _collectionRoute,
             AppRoute(
               'wonder/:detailsType',
-              (s) {
+                  (s) {
                 int tab = int.tryParse(s.uri.queryParameters['t'] ?? '') ?? 0;
                 return WonderDetailsScreen(
                   type: _parseWonderType(s.pathParameters['detailsType']),
@@ -103,7 +103,7 @@ final appRouter = GoRouter(
                 // Search
                 AppRoute(
                   'search/:searchType',
-                  (s) {
+                      (s) {
                     return ArtifactSearchScreen(type: _parseWonderType(s.pathParameters['searchType']));
                   },
                   routes: [
@@ -114,9 +114,9 @@ final appRouter = GoRouter(
                 // Maps
                 AppRoute(
                     'maps/:mapsType',
-                    (s) => FullscreenMapsViewer(
-                          type: _parseWonderType(s.pathParameters['mapsType']),
-                        )),
+                        (s) => FullscreenMapsViewer(
+                      type: _parseWonderType(s.pathParameters['mapsType']),
+                    )),
               ],
             ),
           ]),
@@ -129,25 +129,25 @@ class AppRoute extends GoRoute {
   AppRoute(String path, Widget Function(GoRouterState s) builder,
       {List<GoRoute> routes = const [], this.useFade = false})
       : super(
-          path: path,
-          routes: routes,
-          pageBuilder: (context, state) {
-            final pageContent = Scaffold(
-              body: builder(state),
-              resizeToAvoidBottomInset: false,
-            );
-            if (useFade) {
-              return CustomTransitionPage(
-                key: state.pageKey,
-                child: pageContent,
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-              );
-            }
-            return CupertinoPage(child: pageContent);
+    path: path,
+    routes: routes,
+    pageBuilder: (context, state) {
+      final pageContent = Scaffold(
+        body: builder(state),
+        resizeToAvoidBottomInset: false,
+      );
+      if (useFade) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: pageContent,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
           },
         );
+      }
+      return CupertinoPage(child: pageContent);
+    },
+  );
   final bool useFade;
 }
 

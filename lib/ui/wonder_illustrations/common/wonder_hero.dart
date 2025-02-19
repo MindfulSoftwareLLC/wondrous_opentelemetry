@@ -1,6 +1,6 @@
+import 'package:flutterrific_opentelemetry/metrics/metric_collector.dart';
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/ui/wonder_illustrations/common/wonder_illustration_config.dart';
-import 'package:wonders/metrics/performance_overlay_widget.dart';
 
 /// Utility class that wraps a normal [Hero] widget, but respects WonderIllustrationConfig.enableHero setting
 class WonderHero extends StatelessWidget {
@@ -11,14 +11,14 @@ class WonderHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PerformanceOverlayWidget(
+    return MetricCollector(
       componentName: 'WonderHero-$tag',
       child: config.enableHero
           ? Hero(
-              createRectTween: (begin, end) => RectTween(begin: begin!, end: end!),
-              tag: tag,
-              child: child,
-            )
+        createRectTween: (begin, end) => RectTween(begin: begin!, end: end!),
+        tag: tag,
+        child: child,
+      )
           : child,
     );
   }

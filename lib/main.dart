@@ -12,7 +12,7 @@ import 'package:wonders/logic/timeline_logic.dart';
 import 'package:wonders/logic/unsplash_logic.dart';
 import 'package:wonders/logic/wonders_logic.dart';
 import 'package:wonders/ui/common/app_shortcuts.dart';
-import 'package:wonders/metrics/metrics_service.dart';
+import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -21,12 +21,10 @@ void main() async {
   }
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
+  FlutterOTel.initialize(dartasticApiKey: '123456789');
+
   // Initialize services
   registerSingletons();
-  MetricsService.initialize();
-
-  // Verify metrics system
-  MetricsService.debugPrintMetricsStatus();
 
   runApp(WondersApp());
   await appLogic.bootstrap();
@@ -54,6 +52,7 @@ class _WondersAppState extends State<WondersApp> with GetItStateMixin {
 
   @override
   void dispose() {
+    //TODO - should be a mixin or a widget or hidden in FlutterOTel something simpler
     MetricsService.dispose();
     super.dispose();
   }

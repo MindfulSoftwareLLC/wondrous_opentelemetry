@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutterrific_opentelemetry/metrics/flutter_metric_reporter.dart';
+import 'package:flutterrific_opentelemetry/metrics/metric_collector.dart';
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/logic/data/wonder_data.dart';
 import 'package:wonders/logic/data/wonder_locations.dart';
-import 'package:wonders/metrics/weather_service.dart';
-import 'package:wonders/metrics/performance_overlay_widget.dart';
-import 'package:wonders/metrics/flutter_metric_reporter.dart';
+import 'package:wonders/weather/weather_service.dart';
 
 class WonderWeather extends StatefulWidget {
   final WonderData data;
@@ -99,7 +99,7 @@ class _WonderWeatherState extends State<WonderWeather> {
 
   @override
   Widget build(BuildContext context) {
-    return PerformanceOverlayWidget(
+    return MetricCollector(
       componentName: 'WonderWeather-${widget.data.type}',
       child: Container(
         padding: EdgeInsets.all($styles.insets.sm),

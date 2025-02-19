@@ -66,10 +66,10 @@ packages:
     dependency: transitive
     description:
       name: characters
-      sha256: "04a925763edad70e8443c99234dc3328f442e811f1d8fd1a72f1c8ad0f69a605"
+      sha256: f71061c654a3380576a52b451dd5532377954cf9dbd272a78fc8479606670803
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.0"
+    version: "1.4.0"
   checked_yaml:
     dependency: transitive
     description:
@@ -82,18 +82,18 @@ packages:
     dependency: transitive
     description:
       name: clock
-      sha256: cb6d7f03e1de671e34607e909a7213e31d7752be4fb66a86d29fe1eb14bfb5cf
+      sha256: fddb70d9b5277016c77a80201021d40a2247104d9f4aa7bab7157b7e3f05b84b
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.1.2"
   collection:
     dependency: "direct main"
     description:
       name: collection
-      sha256: a1ace0a119f20aabc852d165077c036cd864315bd99b7eaa10a60100341941bf
+      sha256: "2f5709ae4d3d59dd8f7cd309b4e023046b57d8a6c82130785d2b0e5868084e76"
       url: "https://pub.dev"
     source: hosted
-    version: "1.19.0"
+    version: "1.19.1"
   convert:
     dependency: transitive
     description:
@@ -118,6 +118,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  dartastic_opentelemetry:
+    dependency: transitive
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: c2880b641a7cfbe6545f48a5cfa3f7d14655895c
+      url: "git@github.com:semplicity-inc/dartastic_opentelemetry.git"
+    source: git
+    version: "0.1.0"
   dependency_validator:
     dependency: "direct dev"
     description:
@@ -175,6 +184,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.0"
+  fixnum:
+    dependency: transitive
+    description:
+      name: fixnum
+      sha256: b6dc7065e46c974bc7c5f143080a6764ec7a4be6da1285ececdc37be96de53be
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   flextras:
     dependency: "direct main"
     description:
@@ -270,6 +287,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutterrific_opentelemetry:
+    dependency: "direct main"
+    description:
+      path: "../../flutterrific_opentelemetry"
+      relative: true
+    source: path
+    version: "0.0.1"
   functional_listener:
     dependency: transitive
     description:
@@ -318,6 +342,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "14.2.8"
+  google_identity_services_web:
+    dependency: transitive
+    description:
+      name: google_identity_services_web
+      sha256: "55580f436822d64c8ff9a77e37d61f5fb1e6c7ec9d632a43ee324e2a05c3c6c9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.3"
   google_maps:
     dependency: transitive
     description:
@@ -366,6 +398,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.10"
+  googleapis_auth:
+    dependency: transitive
+    description:
+      name: googleapis_auth
+      sha256: befd71383a955535060acde8792e7efc11d2fccd03dd1d3ec434e85b68775938
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.6.0"
+  grpc:
+    dependency: transitive
+    description:
+      name: grpc
+      sha256: "5b99b7a420937d4361ece68b798c9af8e04b5bc128a7859f2a4be87427694813"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.1"
   home_widget:
     dependency: "direct main"
     description:
@@ -390,6 +438,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.2"
+  http2:
+    dependency: transitive
+    description:
+      name: http2
+      sha256: "382d3aefc5bd6dc68c6b892d7664f29b5beb3251611ae946a98d35158a82bbfa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.1"
   http_parser:
     dependency: transitive
     description:
@@ -490,10 +546,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: bdb68674043280c3428e9ec998512fb681678676b3c54e773629ffe74419f8c7
+      sha256: e3641ec5d63ebf0d9b41bd43201a66e3fc79a65db5f61fc181f04cd27aab950c
       url: "https://pub.dev"
     source: hosted
-    version: "1.15.0"
+    version: "1.16.0"
   nested:
     dependency: transitive
     description:
@@ -501,6 +557,15 @@ packages:
       sha256: "03bac4c528c64c95c722ec99280375a6f2fc708eec17c7b3f07253b626cd2a20"
       url: "https://pub.dev"
     source: hosted
+    version: "1.0.0"
+  opentelemetry_api:
+    dependency: transitive
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "62abd7ac1c85b6f02358b009508d28f4d2fdb5ce"
+      url: "git@github.com:semplicity-inc/opentelemetry_api.git"
+    source: git
     version: "1.0.0"
   package_config:
     dependency: transitive
@@ -538,10 +603,10 @@ packages:
     dependency: transitive
     description:
       name: path
-      sha256: "087ce49c3f0dc39180befefc60fdb4acd8f8620e5682fe2476afd0b3688bb4af"
+      sha256: "75cca69d1490965be98c73ceaea117e8a04dd21217b37b292c9ddbec0d955bc5"
       url: "https://pub.dev"
     source: hosted
-    version: "1.9.0"
+    version: "1.9.1"
   path_parsing:
     dependency: transitive
     description:
@@ -654,6 +719,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.2+1"
+  protobuf:
+    dependency: transitive
+    description:
+      name: protobuf
+      sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   provider:
     dependency: "direct main"
     description:
@@ -795,6 +868,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  synchronized:
+    dependency: transitive
+    description:
+      name: synchronized
+      sha256: "0669c70faae6270521ee4f05bffd2919892d42d1276e6c495be80174b6bc0ef6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.3.1"
   term_glyph:
     dependency: transitive
     description:
@@ -1028,5 +1109,5 @@ packages:
     source: hosted
     version: "3.1.0"
 sdks:
-  dart: ">=3.5.0 <4.0.0"
+  dart: ">=3.7.0 <4.0.0"
   flutter: ">=3.24.0"

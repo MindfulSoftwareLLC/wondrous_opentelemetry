@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'package:flutterrific_opentelemetry/metrics/flutter_metric_reporter.dart';
 import 'package:http/http.dart' as http;
-import 'flutter_metric_reporter.dart';
 
 class WeatherService {
   static const String apiKey = '3f4d6e7bf868e5d14487ff4c06466e36'; // Replace with actual OpenWeatherMap API key
