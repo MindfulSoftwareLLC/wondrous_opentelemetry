@@ -21,8 +21,26 @@ void main() async {
   }
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
-  FlutterOTel.initialize(dartasticApiKey: '123456789');
-
+  FlutterOTel.initialize(
+      serviceName: 'wonderous-dartastic',
+      //endpoint: 'https://flutter-opentel.kb.us-east-2.aws.elastic-cloud.com/',
+      endpoint: 'https://otel-dev.dartastic.io:443',
+      serviceVersion: '1.0.0',
+      //configures the default trace, consider making other tracers for isolates, etc.
+      tracerName: 'ui',
+      //OTel standard tenant_id, required for Dartastic.io
+      tenantId: 'valued-customer-id',
+      //required for the Dartastic.io backend
+      dartasticApiKey: '123456',
+      resourceAttributes: <String, Object>{
+        // Always consult the OTel Semantic Conventions to find an existing
+        // convention name for an attribute.  Semantics are evolving.
+        // https://opentelemetry.io/docs/specs/semconv/
+        //--dart-define environment=dev
+        //See https://opentelemetry.io/docs/specs/semconv/resource/deployment-environment/
+        '${EnvironmentResource.deploymentEnvironment}': String.fromEnvironment('environment'),
+      }
+  );
   // Initialize services
   registerSingletons();
 
@@ -60,14 +78,16 @@ class _WondersAppState extends State<WondersApp> with GetItStateMixin {
   @override
   Widget build(BuildContext context) {
     final locale = watchX((SettingsLogic s) => s.currentLocale);
+    var routerDelegate = appRouter.routerDelegate;
     return MaterialApp.router(
       routeInformationProvider: appRouter.routeInformationProvider,
       routeInformationParser: appRouter.routeInformationParser,
       locale: locale == null ? null : Locale(locale),
       debugShowCheckedModeBanner: false,
-      routerDelegate: appRouter.routerDelegate,
+      routerDelegate: routerDelegate,
       shortcuts: AppShortcuts.defaults,
-      theme: ThemeData(fontFamily: $styles.text.body.fontFamily, useMaterial3: true),
+      theme: ThemeData(
+          fontFamily: $styles.text.body.fontFamily, useMaterial3: true),
       color: $styles.colors.black,
       localizationsDelegates: const [
         AppLocalizations.delegate,

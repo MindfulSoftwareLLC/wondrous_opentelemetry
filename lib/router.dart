@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutterrific_opentelemetry/flutterrific_otel.dart';
 import 'package:flutterrific_opentelemetry/metrics/flutter_metric_reporter.dart';
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/ui/common/modals//fullscreen_video_viewer.dart';
@@ -67,7 +68,7 @@ final appRouter = GoRouter(
   redirect: _handleRedirect,
   errorPageBuilder: (context, state) => MaterialPage(child: PageNotFound(state.uri.toString())),
   observers: [
-    GetIt.I.get<FlutterMetricReporter>(),
+    FlutterOTel.routeObserver
   ],
   routes: [
     ShellRoute(

@@ -121,12 +121,10 @@ packages:
   dartastic_opentelemetry:
     dependency: transitive
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: c2880b641a7cfbe6545f48a5cfa3f7d14655895c
-      url: "git@github.com:semplicity-inc/dartastic_opentelemetry.git"
-    source: git
-    version: "0.1.0"
+      path: "../../semplicity/dartastic_opentelemetry"
+      relative: true
+    source: path
+    version: "0.3.0"
   dependency_validator:
     dependency: "direct dev"
     description:
@@ -561,11 +559,9 @@ packages:
   opentelemetry_api:
     dependency: transitive
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "62abd7ac1c85b6f02358b009508d28f4d2fdb5ce"
-      url: "git@github.com:semplicity-inc/opentelemetry_api.git"
-    source: git
+      path: "../../semplicity/opentelemetry_api"
+      relative: true
+    source: path
     version: "1.0.0"
   package_config:
     dependency: transitive

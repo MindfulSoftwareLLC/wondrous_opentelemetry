@@ -14,6 +14,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  flutterrific_opentelemetry:
+    path: ../../flutterrific_opentelemetry
+  #The rest of the dependencies are wonderous original dependencies
   collection: ^1.17.0
   desktop_window: ^0.4.0
   drop_cap_text:
@@ -23,8 +26,6 @@ dependencies:
   equatable: ^2.0.5
   extra_alignments: ^1.0.0+1
   flextras: ^1.0.0
-  flutterrific_opentelemetry:
-    path: ../../flutterrific_opentelemetry
   flutter_animate: ^4.5.0
   flutter_circular_text: ^0.3.1
   flutter_displaymode: ^0.6.0
