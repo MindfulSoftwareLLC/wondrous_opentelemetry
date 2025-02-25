@@ -23,8 +23,9 @@ void main() async {
 
   FlutterOTel.initialize(
       serviceName: 'wonderous-dartastic',
-      //endpoint: 'https://flutter-opentel.kb.us-east-2.aws.elastic-cloud.com/',
-      endpoint: 'https://otel-dev.dartastic.io:443',
+      endpoint: 'http://ec2-3-139-70-11.us-east-2.compute.amazonaws.com:4317',
+      secure: false,
+      //endpoint: 'https://otel-dev.dartastic.io:443',
       serviceVersion: '1.0.0',
       //configures the default trace, consider making other tracers for isolates, etc.
       tracerName: 'ui',

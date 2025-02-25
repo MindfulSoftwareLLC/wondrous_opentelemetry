@@ -1,7 +1,6 @@
+import 'package:flutterrific_opentelemetry/flutterrific_otel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutterrific_opentelemetry/flutterrific_otel.dart';
-import 'package:flutterrific_opentelemetry/metrics/flutter_metric_reporter.dart';
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/ui/common/modals//fullscreen_video_viewer.dart';
 import 'package:wonders/ui/common/modals/fullscreen_maps_viewer.dart';
