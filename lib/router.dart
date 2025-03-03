@@ -1,4 +1,4 @@
-import 'package:flutterrific_opentelemetry/flutterrific_otel.dart';
+import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:wonders/common_libs.dart';
@@ -64,11 +64,8 @@ AppRoute get _collectionRoute {
 
 /// Routing table, matches string paths to UI Screens, optionally parses params from the paths
 final appRouter = GoRouter(
-  redirect: _handleRedirect,
+  redirect:  OTelGoRouterRedirect(_handleRedirect).callRedirect,
   errorPageBuilder: (context, state) => MaterialPage(child: PageNotFound(state.uri.toString())),
-  observers: [
-    FlutterOTel.routeObserver
-  ],
   routes: [
     ShellRoute(
         builder: (context, router, navigator) {

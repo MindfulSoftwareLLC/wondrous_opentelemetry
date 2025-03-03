@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutterrific_opentelemetry/metrics/flutter_metric_reporter.dart';
-import 'package:flutterrific_opentelemetry/metrics/metric_collector.dart';
+import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/logic/data/wonder_data.dart';
 import 'package:wonders/logic/data/wonder_locations.dart';

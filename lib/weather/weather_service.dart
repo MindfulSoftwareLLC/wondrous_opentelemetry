@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutterrific_opentelemetry/metrics/flutter_metric_reporter.dart';
+import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:http/http.dart' as http;
 
 class WeatherService {

@@ -1,4 +1,4 @@
-import 'package:flutterrific_opentelemetry/metrics/metric_collector.dart';
+import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/ui/wonder_illustrations/common/wonder_illustration_config.dart';
 

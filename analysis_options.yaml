@@ -13,7 +13,7 @@ analyzer:
   errors:
     prefer_const_constructors: ignore
     unused_element: ignore # mostly because of super.key
-    unused_element_parameter: ignore ignore
+    unused_element_parameter: ignore
 
 linter:
   # The lint rules applied to this project can be customized in the

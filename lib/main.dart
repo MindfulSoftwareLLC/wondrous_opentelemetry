@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/logic/artifact_api_logic.dart';
 import 'package:wonders/logic/artifact_api_service.dart';
@@ -13,43 +16,88 @@ import 'package:wonders/logic/unsplash_logic.dart';
 import 'package:wonders/logic/wonders_logic.dart';
 import 'package:wonders/ui/common/app_shortcuts.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+
+const String endpoint = 'https://otel-dev.dartastic.io:443';
+const secure = true;
+// var endpoint = 'http://ec2-3-139-70-11.us-east-2.compute.amazonaws.com:4317';
+// var secure = false;
 
 void main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb) {
-    FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  }
-  GoRouter.optionURLReflectsImperativeAPIs = true;
+  FlutterError.onError = (FlutterErrorDetails details) {
+    if (kDebugMode) {
+      FlutterError.dumpErrorToConsole(details);
+    }
+    FlutterOTel.reportError(
+        'FlutterError.onError', details.exception, details.stack);
+  };
 
-  FlutterOTel.initialize(
-      serviceName: 'wonderous-dartastic',
-      endpoint: 'http://ec2-3-139-70-11.us-east-2.compute.amazonaws.com:4317',
-      secure: false,
-      //endpoint: 'https://otel-dev.dartastic.io:443',
-      serviceVersion: '1.0.0',
-      //configures the default trace, consider making other tracers for isolates, etc.
-      tracerName: 'ui',
-      //OTel standard tenant_id, required for Dartastic.io
-      tenantId: 'valued-customer-id',
-      //required for the Dartastic.io backend
-      dartasticApiKey: '123456',
-      resourceAttributes: <String, Object>{
-        // Always consult the OTel Semantic Conventions to find an existing
-        // convention name for an attribute.  Semantics are evolving.
-        // https://opentelemetry.io/docs/specs/semconv/
-        //--dart-define environment=dev
-        //See https://opentelemetry.io/docs/specs/semconv/resource/deployment-environment/
-        '${EnvironmentResource.deploymentEnvironment}': String.fromEnvironment('environment'),
-      }
-  );
-  // Initialize services
-  registerSingletons();
+  runZonedGuarded(() async {
+    WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+    if (!kIsWeb) {
+      FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+    }
+    ///Flutterrific OTel initialization
+    var sessionId = DateTime.now(); //synthetic session id
+    final deviceInfoPlugin = DeviceInfoPlugin();
+    final deviceInfo = await deviceInfoPlugin.iosInfo;
 
-  runApp(WondersApp());
-  await appLogic.bootstrap();
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    await FlutterOTel.initialize(
+        serviceName: 'wondrous4-dartastic-flutterotel',
+        endpoint: endpoint,
+        secure: secure,
+        serviceVersion: '1.0.0',
+        //configures the default trace, consider making other tracers for isolates, etc.
+        tracerName: 'ui',
+        tracerVersion: '1.0.0',
+        //OTel standard tenant_id, required for Dartastic.io
+        tenantId: 'valued-saas-customer-id',
+        //required for the Dartastic.io backend
+        // dartasticApiKey: '123456',
+        resourceAttributes: <String, Object>{
+          // Always consult the OTel Semantic Conventions to find an existing
+          // convention name for an attribute.  Semantics are evolving.
+          // https://opentelemetry.io/docs/specs/semconv/
+          //--dart-define environment=dev
+          //See https://opentelemetry.io/docs/specs/semconv/resource/deployment-environment/
+          '${EnvironmentResource.deploymentEnvironment}': 'dev',
+          DeviceSemantics.deviceId.key:
+              deviceInfo.identifierForVendor ?? 'no_id',
+          DeviceSemantics.deviceModel.key: deviceInfo.model,
+          DeviceSemantics.devicePlatform.key: deviceInfo.systemName,
+          DeviceSemantics.deviceOsVersion.key: deviceInfo.systemVersion,
+          DeviceSemantics.deviceModel.key: deviceInfo.isiOSAppOnMac,
+          DeviceSemantics.isPhysicalDevice.key: deviceInfo.isPhysicalDevice,
+          AppInfoSemantics.appName.key: packageInfo.appName,
+          AppInfoSemantics.appPackageName.key: packageInfo.packageName,
+          AppInfoSemantics.appVersion.key: packageInfo.version,
+          AppInfoSemantics.appBuildNumber.key: packageInfo.buildNumber,
+        }.toAttributes(),
+        commonAttributesFunction: () => <String, Object>{
+              // These attributes will usually change over time in a real app,
+              // ensure that no null values are included.
+              UserSemantics.userId.key: 'wondrousOTelUser1',
+              UserSemantics.userRole.key: 'demoUser',
+              UserSemantics.userSession.key: sessionId
+            }.toAttributes());
 
-  // Remove splash screen when bootstrap is complete
-  FlutterNativeSplash.remove();
+    GoRouter.optionURLReflectsImperativeAPIs = true;
+
+    // Initialize services
+    registerSingletons();
+
+    runApp(WondersApp());
+    await appLogic.bootstrap();
+
+    // Remove splash screen when bootstrap is complete
+    FlutterNativeSplash.remove();
+  }, (error, stack) {
+    if (kDebugMode) {
+      print(error);
+    }
+    FlutterOTel.reportError('Error caught in run', error, stack);
+  });
 }
 
 /// Creates an app using the [MaterialApp.router] constructor and the global `appRouter`, an instance of [GoRouter].
@@ -121,20 +169,29 @@ void registerSingletons() {
   // Localizations
   GetIt.I.registerLazySingleton<LocaleLogic>(() => LocaleLogic());
   // Home Widget Service
-  GetIt.I.registerLazySingleton<NativeWidgetService>(() => NativeWidgetService());
+  GetIt.I
+      .registerLazySingleton<NativeWidgetService>(() => NativeWidgetService());
 }
 
 /// Add syntax sugar for quickly accessing the main "logic" controllers in the app
 /// We deliberately do not create shortcuts for services, to discourage their use directly in the view/widget layer.
 AppLogic get appLogic => GetIt.I.get<AppLogic>();
+
 WondersLogic get wondersLogic => GetIt.I.get<WondersLogic>();
+
 TimelineLogic get timelineLogic => GetIt.I.get<TimelineLogic>();
+
 SettingsLogic get settingsLogic => GetIt.I.get<SettingsLogic>();
+
 UnsplashLogic get unsplashLogic => GetIt.I.get<UnsplashLogic>();
+
 ArtifactAPILogic get artifactLogic => GetIt.I.get<ArtifactAPILogic>();
+
 CollectiblesLogic get collectiblesLogic => GetIt.I.get<CollectiblesLogic>();
+
 LocaleLogic get localeLogic => GetIt.I.get<LocaleLogic>();
 
 /// Global helpers for readability
 AppLocalizations get $strings => localeLogic.strings;
+
 AppStyle get $styles => WondersAppScaffold.style;
