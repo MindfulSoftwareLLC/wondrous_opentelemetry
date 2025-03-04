@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter/material.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:wonders/common_libs.dart';
@@ -25,6 +27,40 @@ class _WonderWeatherState extends State<WonderWeather> {
   void initState() {
     super.initState();
     _loadWeatherData();
+  }
+
+  Future<void> _makeErrors() async {
+    try {
+      throw Exception('Synchronous error: Something went wrong!');
+    } catch (e, stack) {
+      FlutterOTel.reportError('Synchronous Error', e, stack);
+    }
+
+    Future.delayed(Duration(seconds: 1), () {
+      try {
+        throw Exception('Asynchronous error: Delayed crash!');
+      } catch (e, stack) {
+        FlutterOTel.reportError('Asynchronous Error', e, stack);
+      }
+    });
+
+    // 3. Isolate Error - Runs in a separate Dart Isolate
+    final receivePort = ReceivePort();
+    Isolate.spawn(_isolateError, receivePort.sendPort);
+
+    _futureFailureNoCatch();
+  }
+
+  void _isolateError(SendPort sendPort) {
+    try {
+      throw Exception('Isolate error: Crash in background thread!');
+    } catch (e, stack) {
+      FlutterOTel.reportError('Isolate Error', e, stack);
+    }
+  }
+
+  Future<void> _futureFailureNoCatch() async {
+    Future.error(Exception('Unhandled Future Error'));
   }
 
   Future<void> _loadWeatherData() async {
@@ -74,17 +110,20 @@ class _WonderWeatherState extends State<WonderWeather> {
   }
 
   String get _formattedTemperature {
-    if (_weatherData == null || !_weatherData!.containsKey('main')) return '--°C';
+    if (_weatherData == null || !_weatherData!.containsKey('main'))
+      return '--°C';
     return '${_weatherData!['main']['temp'].round()}°C';
   }
 
   String get _weatherDescription {
-    if (_weatherData == null || !_weatherData!.containsKey('weather')) return 'Unknown';
+    if (_weatherData == null || !_weatherData!.containsKey('weather'))
+      return 'Unknown';
     return _weatherData!['weather'][0]['description'] ?? 'Unknown';
   }
 
   String get _formattedHumidity {
-    if (_weatherData == null || !_weatherData!.containsKey('main')) return '--%';
+    if (_weatherData == null || !_weatherData!.containsKey('main'))
+      return '--%';
     return '${_weatherData!['main']['humidity']}%';
   }
 
@@ -115,11 +154,13 @@ class _WonderWeatherState extends State<WonderWeather> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.wb_sunny, color: $styles.colors.accent1, size: 24),
+                    Icon(Icons.wb_sunny,
+                        color: $styles.colors.accent1, size: 24),
                     Gap($styles.insets.xs),
                     Text(
                       'Current Weather',
-                      style: $styles.text.body.copyWith(color: $styles.colors.white),
+                      style: $styles.text.body
+                          .copyWith(color: $styles.colors.white),
                     ),
                   ],
                 ),
@@ -135,7 +176,8 @@ class _WonderWeatherState extends State<WonderWeather> {
             if (_error != null)
               Text(
                 _error!,
-                style: $styles.text.body.copyWith(color: $styles.colors.errorRed),
+                style:
+                    $styles.text.body.copyWith(color: $styles.colors.errorRed),
               )
             else if (_weatherData != null)
               Column(
@@ -161,17 +203,26 @@ class _WonderWeatherState extends State<WonderWeather> {
                   ),
                   Gap($styles.insets.xs),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.water_drop,
-                        color: $styles.colors.accent2,
-                        size: 16,
-                      ),
-                      Gap($styles.insets.xxs),
-                      Text(
-                        'Humidity: $_formattedHumidity',
-                        style: $styles.text.body.copyWith(
-                          color: $styles.colors.white,
+                      Row(children: [
+                        Icon(
+                          Icons.water_drop,
+                          color: $styles.colors.accent2,
+                          size: 16,
                         ),
+                        Gap($styles.insets.xxs),
+                        Text(
+                          'Humidity: $_formattedHumidity',
+                          style: $styles.text.body.copyWith(
+                            color: $styles.colors.white,
+                          ),
+                        ),
+                      ]),
+                      IconButton(
+                        icon: Icon(Icons.error, color: $styles.colors.accent1),
+                        onPressed: _makeErrors,
+                        tooltip: 'Create Error for OTel',
                       ),
                     ],
                   ),
