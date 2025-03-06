@@ -1,4 +1,5 @@
 import 'package:wonders/common_libs.dart';
+import 'package:wonders/metrics/wonder_metrics.dart';
 import 'package:wonders/ui/common/lazy_indexed_stack.dart';
 import 'package:wonders/ui/common/measurable_widget.dart';
 import 'package:wonders/ui/screens/artifact/artifact_carousel/artifact_carousel_screen.dart';
@@ -27,6 +28,14 @@ class _WonderDetailsScreenState extends State<WonderDetailsScreen>
 
   double? _tabBarSize;
   bool _useNavRail = false;
+
+  @override
+  void initState() {
+    // Record metrics for wonder view
+    WonderMetrics.instance.recordWonderSelect(widget.type.name);
+
+    super.initState();
+  }
 
   @override
   void didUpdateWidget(covariant WonderDetailsScreen oldWidget) {

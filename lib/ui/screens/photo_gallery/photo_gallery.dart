@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
+import 'package:opentelemetry_api/opentelemetry_api.dart' show InteractionType;
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/logic/data/unsplash_photo_data.dart';
 import 'package:wonders/ui/common/controls/app_loading_indicator.dart';
@@ -14,7 +16,9 @@ import 'package:wonders/ui/common/utils/app_haptics.dart';
 part 'widgets/_animated_cutout_overlay.dart';
 
 class PhotoGallery extends StatefulWidget {
-  const PhotoGallery({super.key, this.imageSize, required this.collectionId, required this.wonderType});
+  const PhotoGallery(
+      {super.key, this.imageSize, required this.collectionId, required this.wonderType});
+
   final Size? imageSize;
   final String collectionId;
   final WonderType wonderType;
@@ -25,6 +29,7 @@ class PhotoGallery extends StatefulWidget {
 
 class _PhotoGalleryState extends State<PhotoGallery> {
   static const int _gridSize = 5;
+
   // Index starts in the middle of the grid (eg, 25 items, index will start at 13)
   int _index = ((_gridSize * _gridSize) / 2).round();
   Offset _lastSwipeDir = Offset.zero;
@@ -32,9 +37,11 @@ class _PhotoGalleryState extends State<PhotoGallery> {
   bool _skipNextOffsetTween = false;
   late Duration swipeDuration = $styles.times.med * .4;
   final _photoIds = ValueNotifier<List<String>>([]);
+
   int get _imgCount => pow(_gridSize, 2).round();
 
-  late final List<FocusNode> _focusNodes = List.generate(_imgCount, (index) => FocusNode());
+  late final List<FocusNode> _focusNodes = List.generate(
+      _imgCount, (index) => FocusNode());
 
   //TODO: Remove this field (and associated workarounds) once web properly supports ClipPath (https://github.com/flutter/flutter/issues/124675)
   final bool useClipPathWorkAroundForWeb = kIsWeb;
@@ -58,10 +65,16 @@ class _PhotoGalleryState extends State<PhotoGallery> {
     setState(() => _photoIds.value = ids ?? []);
   }
 
-  void _setIndex(int value, {bool skipAnimation = false}) {
+  void _setIndex(int value, InteractionType interactionType, {bool skipAnimation = false}) {
     if (value < 0 || value >= _imgCount) return;
     _skipNextOffsetTween = skipAnimation;
     setState(() => _index = value);
+    FlutterOTel.tracer.recordUserInteraction('PhotoGallery',
+        interactionType,
+        attributes: <String, Object> {
+
+        }.toAttributes()
+    );
     _focusNodes[value].requestFocus();
   }
 
@@ -71,11 +84,13 @@ class _PhotoGalleryState extends State<PhotoGallery> {
     double halfCount = (_gridSize / 2).floorToDouble();
     Size paddedImageSize = Size(size.width + padding, size.height + padding);
     // Get the starting offset that would show the top-left image (index 0)
-    final originOffset = Offset(halfCount * paddedImageSize.width, halfCount * paddedImageSize.height);
+    final originOffset = Offset(
+        halfCount * paddedImageSize.width, halfCount * paddedImageSize.height);
     // Add the offset for the row/col
     int col = _index % _gridSize;
     int row = (_index / _gridSize).floor();
-    final indexedOffset = Offset(-paddedImageSize.width * col, -paddedImageSize.height * row);
+    final indexedOffset = Offset(
+        -paddedImageSize.width * col, -paddedImageSize.height * row);
     return originOffset + indexedOffset;
   }
 
@@ -112,7 +127,7 @@ class _PhotoGalleryState extends State<PhotoGallery> {
         outOfBounds) {
       return false;
     }
-    _setIndex(newIndex);
+    _setIndex(newIndex, InteractionType.keydown);
     return true;
   }
 
@@ -134,7 +149,7 @@ class _PhotoGalleryState extends State<PhotoGallery> {
     }
     _lastSwipeDir = dir;
     AppHaptics.lightImpact();
-    _setIndex(newIndex);
+    _setIndex(newIndex, InteractionType.swipe);
   }
 
   Future<void> _handleImageTapped(int index, bool isSelected) async {
@@ -149,21 +164,22 @@ class _PhotoGalleryState extends State<PhotoGallery> {
       );
 
       if (newIndex != null) {
-        _setIndex(newIndex, skipAnimation: true);
+        _setIndex(newIndex, InteractionType.tap, skipAnimation: true);
       }
     } else {
-      _setIndex(index);
+      _setIndex(index, InteractionType.tap);
     }
   }
 
   void _handleImageFocusChanged(int index, bool isFocused) {
     if (isFocused) {
-      _setIndex(index);
+      _setIndex(index, InteractionType.focusChange);
     }
   }
 
   bool _checkCollectibleIndex(int index) {
-    return index == _getCollectibleIndex() && collectiblesLogic.isLost(widget.wonderType, 1);
+    return index == _getCollectibleIndex() &&
+        collectiblesLogic.isLost(widget.wonderType, 1);
   }
 
   @override
@@ -184,8 +200,12 @@ class _PhotoGalleryState extends State<PhotoGallery> {
             final padding = $styles.insets.md;
             var gridOffset = _calculateCurrentOffset(padding, imgSize);
             gridOffset += Offset(0, -context.mq.padding.top / 2);
-            final offsetTweenDuration = _skipNextOffsetTween ? Duration.zero : swipeDuration;
-            final cutoutTweenDuration = _skipNextOffsetTween ? Duration.zero : swipeDuration * .5;
+            final offsetTweenDuration = _skipNextOffsetTween
+                ? Duration.zero
+                : swipeDuration;
+            final cutoutTweenDuration = _skipNextOffsetTween
+                ? Duration.zero
+                : swipeDuration * .5;
             return _AnimatedCutoutOverlay(
               animationKey: ValueKey(_index),
               cutoutSize: imgSize,
@@ -197,8 +217,10 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                 bottom: false,
                 // Place content in overflow box, to allow it to flow outside the parent
                 child: OverflowBox(
-                  maxWidth: _gridSize * imgSize.width + padding * (_gridSize - 1),
-                  maxHeight: _gridSize * imgSize.height + padding * (_gridSize - 1),
+                  maxWidth: _gridSize * imgSize.width +
+                      padding * (_gridSize - 1),
+                  maxHeight: _gridSize * imgSize.height +
+                      padding * (_gridSize - 1),
                   alignment: Alignment.center,
                   // Detect swipes in order to change index
                   child: EightWaySwipeDetector(
@@ -209,7 +231,8 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                       tween: Tween(begin: gridOffset, end: gridOffset),
                       duration: offsetTweenDuration,
                       curve: Curves.easeOut,
-                      builder: (_, value, child) => Transform.translate(offset: value, child: child),
+                      builder: (_, value, child) =>
+                          Transform.translate(offset: value, child: child),
                       child: FocusTraversalGroup(
                         //policy: OrderedTraversalPolicy(),
                         child: GridView.count(
@@ -218,7 +241,8 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                           childAspectRatio: imgSize.aspectRatio,
                           mainAxisSpacing: padding,
                           crossAxisSpacing: padding,
-                          children: List.generate(_imgCount, (i) => _buildImage(i, swipeDuration, imgSize)),
+                          children: List.generate(_imgCount, (i) =>
+                              _buildImage(i, swipeDuration, imgSize)),
                         ),
                       ),
                     ),
@@ -245,14 +269,16 @@ class _PhotoGalleryState extends State<PhotoGallery> {
             } else {
               semanticLbl = !isSelected
                   ? $strings.photoGallerySemanticFocus(index + 1, _imgCount)
-                  : $strings.photoGallerySemanticFullscreen(index + 1, _imgCount);
+                  : $strings.photoGallerySemanticFullscreen(
+                  index + 1, _imgCount);
             }
 
             final photoWidget = TweenAnimationBuilder<double>(
               duration: $styles.times.med,
               curve: Curves.easeOut,
               tween: Tween(begin: 1, end: isSelected ? 1.15 : 1),
-              builder: (_, value, child) => Transform.scale(scale: value, child: child),
+              builder: (_, value, child) =>
+                  Transform.scale(scale: value, child: child),
               child: UnsplashPhoto(
                 imgUrl,
                 fit: BoxFit.cover,
@@ -269,36 +295,39 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                 onDecrease: () => _handleImageTapped(_index - 1, false),
                 child: _checkCollectibleIndex(index)
                     ? Center(
-                        child: HiddenCollectible(widget.wonderType, index: 1, size: 100, focus: _focusNodes[index]),
-                      )
+                  child: HiddenCollectible(widget.wonderType, index: 1,
+                      size: 100,
+                      focus: _focusNodes[index]),
+                )
                     : AppBtn.basic(
-                        semanticLabel: semanticLbl,
-                        focusNode: _focusNodes[index],
-                        onFocusChanged: (isFocused) => _handleImageFocusChanged(index, isFocused),
-                        onPressed: () => _handleImageTapped(index, isSelected),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: SizedBox(
-                            width: imgSize.width,
-                            height: imgSize.height,
-                            child: (useClipPathWorkAroundForWeb == false)
-                                ? photoWidget
-                                : Stack(
-                                    children: [
-                                      photoWidget,
-                                      // Because the web platform doesn't support clipPath, we use a workaround to highlight the selected image
-                                      Positioned.fill(
-                                        child: AnimatedOpacity(
-                                          duration: $styles.times.med,
-                                          opacity: isSelected ? 0 : .7,
-                                          child: ColoredBox(color: $styles.colors.black),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                  semanticLabel: semanticLbl,
+                  focusNode: _focusNodes[index],
+                  onFocusChanged: (isFocused) =>
+                      _handleImageFocusChanged(index, isFocused),
+                  onPressed: () => _handleImageTapped(index, isSelected),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      width: imgSize.width,
+                      height: imgSize.height,
+                      child: (useClipPathWorkAroundForWeb == false)
+                          ? photoWidget
+                          : Stack(
+                        children: [
+                          photoWidget,
+                          // Because the web platform doesn't support clipPath, we use a workaround to highlight the selected image
+                          Positioned.fill(
+                            child: AnimatedOpacity(
+                              duration: $styles.times.med,
+                              opacity: isSelected ? 0 : .7,
+                              child: ColoredBox(color: $styles.colors.black),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
+                    ),
+                  ),
+                ),
               ),
             );
           }),

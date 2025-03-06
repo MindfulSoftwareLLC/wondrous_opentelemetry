@@ -18,18 +18,21 @@ import 'package:wonders/ui/common/app_shortcuts.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
-const String endpoint = 'https://otel-dev.dartastic.io:443';
-const secure = true;
-// var endpoint = 'http://ec2-3-139-70-11.us-east-2.compute.amazonaws.com:4317';
-// var secure = false;
+const endpoint = 'http://ec2-3-139-70-11.us-east-2.compute.amazonaws.com:4317';
+const secure = false;
 
 void main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
     if (kDebugMode) {
       FlutterError.dumpErrorToConsole(details);
     }
+    // Report error to both spans and metrics
     FlutterOTel.reportError(
-        'FlutterError.onError', details.exception, details.stack);
+        'FlutterError.onError', details.exception, details.stack,
+        attributes: {
+          'error.source': 'flutter_error',
+          'error.type': details.exception.runtimeType.toString(),
+        });
   };
 
   runZonedGuarded(() async {
@@ -44,7 +47,7 @@ void main() async {
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     await FlutterOTel.initialize(
-        serviceName: 'wondrous4-dartastic-flutterotel',
+        serviceName: 'wondrous-flutterotel',
         endpoint: endpoint,
         secure: secure,
         serviceVersion: '1.0.0',
@@ -61,7 +64,7 @@ void main() async {
           // https://opentelemetry.io/docs/specs/semconv/
           //--dart-define environment=dev
           //See https://opentelemetry.io/docs/specs/semconv/resource/deployment-environment/
-          '${EnvironmentResource.deploymentEnvironment}': 'dev',
+          EnvironmentResource.deploymentEnvironment.key: 'dev',
           DeviceSemantics.deviceId.key:
               deviceInfo.identifierForVendor ?? 'no_id',
           DeviceSemantics.deviceModel.key: deviceInfo.model,
@@ -96,7 +99,12 @@ void main() async {
     if (kDebugMode) {
       print(error);
     }
-    FlutterOTel.reportError('Error caught in run', error, stack);
+    // Report error to both spans and metrics
+    FlutterOTel.reportError('Error caught in run', error, stack,
+        attributes: {
+          'error.source': 'zone_error',
+          'error.type': error.runtimeType.toString(),
+        });
   });
 }
 

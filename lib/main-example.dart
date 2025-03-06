@@ -19,15 +19,15 @@ Future<void> copyOfOTLPgRPCExample() async {
 
   // Create a new root span
   final rootSpan = tracer.startSpan(
-    'root-operation-wonderous-dartastic',
+    'root-operation-wonderous-otel',
     attributes: OTel.attributesFromMap({
-      'example-dartastic.key': 'example-value-dartastic',
+      'example-flutter-otel.key': 'example-value-flutterotel',
     }),
   );
 
   try {
     // Add an event to match Python example
-    rootSpan.addEventNow('Event within span-dartastic');
+    rootSpan.addEventNow('Event within span-flutter-otel');
 
     print('Dartastic Trace with a span sent to OpenTelemetry via dart-bushe-0211-grpc-batch!');
 
@@ -36,7 +36,7 @@ Future<void> copyOfOTLPgRPCExample() async {
 
     // Create a child span
     final childSpan = tracer.startSpan(
-      'child-operation-dartastic',
+      'child-operation-flutter-otel',
       parentSpan: rootSpan,
     );
 
