@@ -13,7 +13,7 @@ class WonderMetricsObserver extends OTelNavigatorObserver {
     
     if (routeName != null) {
       // Record page visit as a metric
-      FlutterOTel.recordMetric(
+      FlutterOTelMetrics.recordMetric(
         name: 'page.visit',
         value: 1,
         metricType: 'counter',
@@ -38,7 +38,7 @@ class WonderMetricsObserver extends OTelNavigatorObserver {
     
     if (routeName != null) {
       // Record page return as a metric
-      FlutterOTel.recordMetric(
+      FlutterOTelMetrics.recordMetric(
         name: 'page.return',
         value: 1,
         metricType: 'counter',
@@ -70,7 +70,7 @@ class WonderMetricsObserver extends OTelNavigatorObserver {
     final loadDuration = DateTime.now().difference(startTime);
     
     // Record the page load time
-    FlutterOTel.recordMetric(
+    FlutterOTelMetrics.recordMetric(
       name: 'page.load_time',
       value: loadDuration.inMilliseconds,
       unit: 'ms',

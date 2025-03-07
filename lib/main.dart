@@ -97,9 +97,9 @@ void main() async {
     FlutterNativeSplash.remove();
   }, (error, stack) {
     if (kDebugMode) {
-      print(error);
+      debugPrint('$error');
+      debugPrintStack(stackTrace: stack, label: 'Flutter app runZoneGuarded');
     }
-    // Report error to both spans and metrics
     FlutterOTel.reportError('Error caught in run', error, stack,
         attributes: {
           'error.source': 'zone_error',

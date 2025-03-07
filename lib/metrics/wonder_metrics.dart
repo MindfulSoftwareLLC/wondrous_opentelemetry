@@ -13,7 +13,7 @@ class WonderMetrics {
 
   /// Record a wonder selection event
   void recordWonderSelect(String wonderName) {
-    FlutterOTel.recordMetric(
+    FlutterOTelMetrics.recordMetric(
       name: 'wonder.select',
       value: 1,
       metricType: 'counter',
@@ -25,7 +25,7 @@ class WonderMetrics {
   
   /// Record a search action
   void recordSearch(String query, String wonderName, int resultCount) {
-    FlutterOTel.recordMetric(
+    FlutterOTelMetrics.recordMetric(
       name: 'search.perform',
       value: 1,
       metricType: 'counter',
@@ -36,7 +36,7 @@ class WonderMetrics {
     );
     
     // Also record the number of results
-    FlutterOTel.recordMetric(
+    FlutterOTelMetrics.recordMetric(
       name: 'search.results',
       value: resultCount,
       metricType: 'histogram',
@@ -48,7 +48,7 @@ class WonderMetrics {
   
   /// Record a user interaction with a wonder
   void recordWonderInteraction(String wonderName, String interactionType) {
-    FlutterOTel.recordMetric(
+    FlutterOTelMetrics.recordMetric(
       name: 'wonder.interaction',
       value: 1,
       metricType: 'counter',
@@ -61,7 +61,7 @@ class WonderMetrics {
   
   /// Record a performance metric
   void recordPerformance(String name, Duration duration, {Map<String, Object>? attributes}) {
-    FlutterOTel.recordMetric(
+    FlutterOTelMetrics.recordMetric(
       name: 'performance.$name',
       value: duration.inMilliseconds,
       unit: 'ms',
@@ -72,7 +72,7 @@ class WonderMetrics {
   
   /// Record artifact view
   void recordArtifactView(String artifactId, String wonderName) {
-    FlutterOTel.recordMetric(
+    FlutterOTelMetrics.recordMetric(
       name: 'artifact.view',
       value: 1,
       metricType: 'counter',
