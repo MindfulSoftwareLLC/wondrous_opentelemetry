@@ -40,12 +40,33 @@ void main() async {
     if (!kIsWeb) {
       FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
     }
+
     ///Flutterrific OTel initialization
     var sessionId = DateTime.now(); //synthetic session id
     final deviceInfoPlugin = DeviceInfoPlugin();
     final deviceInfo = await deviceInfoPlugin.iosInfo;
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+    // Enable comprehensive logging for debugging metrics
+    OTelLog.metricLogFunction = debugPrint;
+    OTelLog.exportLogFunction = debugPrint;
+    OTelLog.spanLogFunction = debugPrint;
+
+    // Create a manual periodic exporter that will flush metrics immediately
+    final otlpMetricExporter = OtlpGrpcMetricExporter(
+      OtlpGrpcMetricExporterConfig(
+        endpoint: endpoint,
+        insecure: !secure,
+      ),
+    );
+
+    // Configure a periodic manual reader with very short interval for mobile
+    final metricReader = PeriodicExportingMetricReader(
+      otlpMetricExporter,
+      interval: Duration(seconds: 1), // Export every second
+    );
+
     await FlutterOTel.initialize(
         serviceName: 'wondrous-flutterotel',
         endpoint: endpoint,
@@ -54,6 +75,8 @@ void main() async {
         //configures the default trace, consider making other tracers for isolates, etc.
         tracerName: 'ui',
         tracerVersion: '1.0.0',
+        metricExporter: otlpMetricExporter,
+        metricReader: metricReader,
         //OTel standard tenant_id, required for Dartastic.io
         tenantId: 'valued-saas-customer-id',
         //required for the Dartastic.io backend
@@ -90,6 +113,14 @@ void main() async {
     // Initialize services
     registerSingletons();
 
+    // Set up a periodic timer to flush metrics every few seconds
+    Timer.periodic(Duration(seconds: 5), (_) {
+      if (OTelLog.isLogMetrics()) {
+        OTelLog.logMetric("Periodic metrics flush");
+      }
+      OTel.meterProvider().forceFlush();
+    });
+
     runApp(WondersApp());
     await appLogic.bootstrap();
 
@@ -100,11 +131,10 @@ void main() async {
       debugPrint('$error');
       debugPrintStack(stackTrace: stack, label: 'Flutter app runZoneGuarded');
     }
-    FlutterOTel.reportError('Error caught in run', error, stack,
-        attributes: {
-          'error.source': 'zone_error',
-          'error.type': error.runtimeType.toString(),
-        });
+    FlutterOTel.reportError('Error caught in run', error, stack, attributes: {
+      'error.source': 'zone_error',
+      'error.type': error.runtimeType.toString(),
+    });
   });
 }
 
@@ -129,6 +159,15 @@ class _WondersAppState extends State<WondersApp> with GetItStateMixin {
   void dispose() {
     //TODO - should be a mixin or a widget or hidden in FlutterOTel something simpler
     MetricsService.dispose();
+
+    // Force flush before disposing to ensure all metrics are sent
+    OTel.meterProvider().forceFlush();
+    OTel.tracerProvider().forceFlush();
+
+    if (OTelLog.isLogMetrics()) {
+      OTelLog.logMetric("Flushing metrics before app dispose");
+    }
+
     super.dispose();
   }
 
