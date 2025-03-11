@@ -137,10 +137,12 @@ packages:
   dartastic_opentelemetry:
     dependency: transitive
     description:
-      path: "../dartastic_opentelemetry"
-      relative: true
-    source: path
-    version: "0.3.0"
+      path: "."
+      ref: HEAD
+      resolved-ref: "59fe277abce8f1d3d6fe63af4d9d99e7a98bc90f"
+      url: "https://github.com/MindfulSoftwareLLC/dartastic_opentelemetry.git"
+    source: git
+    version: "1.0.0"
   dbus:
     dependency: transitive
     description:
@@ -328,10 +330,12 @@ packages:
   flutterrific_opentelemetry:
     dependency: "direct main"
     description:
-      path: "../flutterrific_opentelemetry"
-      relative: true
-    source: path
-    version: "0.0.1"
+      path: "."
+      ref: HEAD
+      resolved-ref: "100765f281cd1ae9a1894b362c103400c33e40e5"
+      url: "https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry.git"
+    source: git
+    version: "1.0.0"
   functional_listener:
     dependency: transitive
     description:
@@ -599,9 +603,11 @@ packages:
   opentelemetry_api:
     dependency: transitive
     description:
-      path: "../opentelemetry_api"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "2e8d8d41a1856f367a8b2b28a3c791ff96000558"
+      url: "https://github.com/MindfulSoftwareLLC/opentelemetry_api.git"
+    source: git
     version: "1.0.0"
   package_config:
     dependency: transitive
