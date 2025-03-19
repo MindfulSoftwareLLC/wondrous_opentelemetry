@@ -1,0 +1,84 @@
+name: Upload Debug Symbols
+
+on:
+  # Run after a successful release build
+  workflow_run:
+    workflows: ["Flutter Release Build"]
+    types:
+      - completed
+  
+  # Also allow manual triggering
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to upload debug symbols for'
+        required: true
+        default: 'ios'
+        type: choice
+        options:
+          - 'ios'
+          - 'android'
+          - 'web'
+          - 'macos'
+          - 'windows'
+          - 'linux'
+
+jobs:
+  upload_debug_symbols:
+    name: Upload Debug Symbols to Dartastic.io
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      
+      - name: Install Dependencies
+        run: |
+          flutter pub get
+          dart pub get -C tools
+      
+      - name: Determine Platform
+        id: platform
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "platform=${{ github.event.inputs.platform }}" >> $GITHUB_ENV
+          else
+            # Default to all platforms in automated runs
+            echo "platform=all" >> $GITHUB_ENV
+          fi
+      
+      - name: Upload iOS Debug Symbols
+        if: env.platform == 'ios' || env.platform == 'all'
+        run: |
+          dart tools/upload_debug_symbols.dart --platform ios
+      
+      - name: Upload Android Debug Symbols
+        if: env.platform == 'android' || env.platform == 'all'
+        run: |
+          dart tools/upload_debug_symbols.dart --platform android
+      
+      - name: Upload Web Source Maps
+        if: env.platform == 'web' || env.platform == 'all'
+        run: |
+          dart tools/upload_debug_symbols.dart --platform web
+      
+      - name: Upload macOS Debug Symbols
+        if: env.platform == 'macos' || env.platform == 'all'
+        run: |
+          dart tools/upload_debug_symbols.dart --platform macos
+      
+      - name: Upload Windows Debug Symbols
+        if: env.platform == 'windows' || env.platform == 'all'
+        run: |
+          dart tools/upload_debug_symbols.dart --platform windows
+      
+      - name: Upload Linux Debug Symbols
+        if: env.platform == 'linux' || env.platform == 'all'
+        run: |
+          dart tools/upload_debug_symbols.dart --platform linux

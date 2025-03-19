@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:http/http.dart' as http;
 
@@ -30,6 +31,8 @@ class WeatherService {
         throw Exception('Failed to load weather data');
       }
     } catch (e, stackTrace) {
+      debugPrint('$e');
+      debugPrintStack(stackTrace: stackTrace);
       _reporter.reportError(
         'Weather API Error',
         stackTrace: stackTrace,

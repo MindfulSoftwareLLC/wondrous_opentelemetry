@@ -139,7 +139,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "59fe277abce8f1d3d6fe63af4d9d99e7a98bc90f"
+      resolved-ref: ea165f4d22ade172b747db4d9163b66195d6c877
       url: "https://github.com/MindfulSoftwareLLC/dartastic_opentelemetry.git"
     source: git
     version: "1.0.0"
@@ -332,7 +332,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "100765f281cd1ae9a1894b362c103400c33e40e5"
+      resolved-ref: ab67b9cd74f7a0caf51ad30289e22e0ddaf45d7c
       url: "https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry.git"
     source: git
     version: "1.0.0"
@@ -605,10 +605,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "2e8d8d41a1856f367a8b2b28a3c791ff96000558"
+      resolved-ref: "4de882a19f9222d6d815c4dab8c4933cd2ce35b6"
       url: "https://github.com/MindfulSoftwareLLC/opentelemetry_api.git"
     source: git
-    version: "1.0.0"
+    version: "1.0.1"
   package_config:
     dependency: transitive
     description:

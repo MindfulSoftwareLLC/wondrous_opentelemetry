@@ -5,7 +5,8 @@ import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/logic/data/wonder_data.dart';
 import 'package:wonders/logic/data/wonder_locations.dart';
-import 'package:wonders/weather/weather_service.dart';
+import 'package:wonders/main.dart';
+import 'package:wonders/weather/dartastic_weather_service.dart';
 
 class WonderWeather extends StatefulWidget {
   final WonderData data;
@@ -19,7 +20,7 @@ class WonderWeather extends StatefulWidget {
 class _WonderWeatherState extends State<WonderWeather> {
   Map<String, dynamic>? _weatherData;
   String? _error;
-  final _weatherService = WeatherService();
+  final _weatherService = DartasticWeatherService();
   final _metricReporter = FlutterMetricReporter();
   DateTime? _lastRefreshTime;
 
@@ -56,6 +57,9 @@ class _WonderWeatherState extends State<WonderWeather> {
       throw Exception('Isolate error: Crash in background thread!');
     } catch (e, stack) {
       FlutterOTel.reportError('Isolate Error', e, stack);
+      // Note: We can't report to Dartastic directly from isolate
+      // In a real app, you would send the error back via the SendPort
+      // and then report it from the main isolate
     }
   }
 
@@ -165,10 +169,19 @@ class _WonderWeatherState extends State<WonderWeather> {
                   ],
                 ),
                 if (_error == null)
-                  IconButton(
-                    icon: Icon(Icons.refresh, color: $styles.colors.accent1),
-                    onPressed: _loadWeatherData,
-                    tooltip: 'Refresh weather data',
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.refresh, color: $styles.colors.accent1),
+                        onPressed: _loadWeatherData,
+                        tooltip: 'Refresh weather data',
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.error, color: $styles.colors.accent1),
+                        onPressed: _makeErrors,
+                        tooltip: 'Create Error for OTel',
+                      ),
+                    ],
                   ),
               ],
             ),
@@ -219,11 +232,6 @@ class _WonderWeatherState extends State<WonderWeather> {
                           ),
                         ),
                       ]),
-                      IconButton(
-                        icon: Icon(Icons.error, color: $styles.colors.accent1),
-                        onPressed: _makeErrors,
-                        tooltip: 'Create Error for OTel',
-                      ),
                     ],
                   ),
                   Gap($styles.insets.xs),

@@ -1,0 +1,19 @@
+# Override the Git dependencies with hosted packages from the private pub server
+dependency_overrides:
+  opentelemetry_api:
+    hosted:
+      name: opentelemetry_api
+      url: https://flutter-symbolizer-6djqlrsgkq-uc.a.run.app/packages/
+    version: 1.0.1
+
+  dartastic_opentelemetry:
+    hosted:
+      name: dartastic_opentelemetry
+      url: https://flutter-symbolizer-6djqlrsgkq-uc.a.run.app/packages/
+    version: 1.0.0
+
+  flutterrific_opentelemetry:
+    hosted:
+      name: flutterrific_opentelemetry
+      url: https://flutter-symbolizer-6djqlrsgkq-uc.a.run.app/packages/
+    version: 1.0.0

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -18,6 +19,9 @@ import 'package:wonders/ui/common/app_shortcuts.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
+// TODO - shouldn't be necessary
+import 'package:opentelemetry_api/opentelemetry_api.dart';
+
 const endpoint = 'http://ec2-3-139-70-11.us-east-2.compute.amazonaws.com:4317';
 const secure = false;
 
@@ -26,12 +30,14 @@ void main() async {
     if (kDebugMode) {
       FlutterError.dumpErrorToConsole(details);
     }
+
     // Report error to both spans and metrics
     FlutterOTel.reportError(
         'FlutterError.onError', details.exception, details.stack,
         attributes: {
-          'error.source': 'flutter_error',
-          'error.type': details.exception.runtimeType.toString(),
+          ErrorSemantics.errorSource.key: 'flutter_error',
+          ErrorSemantics.errorType.key:
+              details.exception.runtimeType.toString(),
         });
   };
 
@@ -42,16 +48,39 @@ void main() async {
     }
 
     ///Flutterrific OTel initialization
+    /// TODO - Errors here dont get to uninitialized OTel
+    Map<String, Object> deviceAttrs = {};
     var sessionId = DateTime.now(); //synthetic session id
     final deviceInfoPlugin = DeviceInfoPlugin();
-    final deviceInfo = await deviceInfoPlugin.iosInfo;
+    // TODO - complete per-platform semantics, conveniently
+    if (Platform.isAndroid) {
+      final deviceInfo = await deviceInfoPlugin.androidInfo;
+      deviceAttrs.addAll({
+        DeviceSemantics.deviceId.key: deviceInfo.id,
+        DeviceSemantics.deviceModel.key: deviceInfo.model,
+        DeviceSemantics.devicePlatform.key: deviceInfo.manufacturer,
+        DeviceSemantics.deviceOsVersion.key: deviceInfo.version,
+        DeviceSemantics.deviceModel.key: deviceInfo.device,
+        DeviceSemantics.isPhysicalDevice.key: deviceInfo.isPhysicalDevice,
+      });
+    } else if (Platform.isIOS) {
+      final deviceInfo = await deviceInfoPlugin.iosInfo;
+      deviceAttrs.addAll({
+        DeviceSemantics.deviceId.key: deviceInfo.identifierForVendor ?? 'no_id',
+        DeviceSemantics.deviceModel.key: deviceInfo.model,
+        DeviceSemantics.devicePlatform.key: deviceInfo.systemName,
+        DeviceSemantics.deviceOsVersion.key: deviceInfo.systemVersion,
+        DeviceSemantics.deviceModel.key: deviceInfo.isiOSAppOnMac,
+        DeviceSemantics.isPhysicalDevice.key: deviceInfo.isPhysicalDevice,
+      });
+    }
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
     // Enable comprehensive logging for debugging metrics
-    OTelLog.metricLogFunction = debugPrint;
-    OTelLog.exportLogFunction = debugPrint;
-    OTelLog.spanLogFunction = debugPrint;
+    // OTelLog.spanLogFunction = debugPrint;
+    // OTelLog.metricLogFunction = debugPrint;
+    // OTelLog.exportLogFunction = debugPrint;
 
     // Create a manual periodic exporter that will flush metrics immediately
     final otlpMetricExporter = OtlpGrpcMetricExporter(
@@ -88,13 +117,7 @@ void main() async {
           //--dart-define environment=dev
           //See https://opentelemetry.io/docs/specs/semconv/resource/deployment-environment/
           EnvironmentResource.deploymentEnvironment.key: 'dev',
-          DeviceSemantics.deviceId.key:
-              deviceInfo.identifierForVendor ?? 'no_id',
-          DeviceSemantics.deviceModel.key: deviceInfo.model,
-          DeviceSemantics.devicePlatform.key: deviceInfo.systemName,
-          DeviceSemantics.deviceOsVersion.key: deviceInfo.systemVersion,
-          DeviceSemantics.deviceModel.key: deviceInfo.isiOSAppOnMac,
-          DeviceSemantics.isPhysicalDevice.key: deviceInfo.isPhysicalDevice,
+          ...deviceAttrs,
           AppInfoSemantics.appName.key: packageInfo.appName,
           AppInfoSemantics.appPackageName.key: packageInfo.packageName,
           AppInfoSemantics.appVersion.key: packageInfo.version,
@@ -131,10 +154,11 @@ void main() async {
       debugPrint('$error');
       debugPrintStack(stackTrace: stack, label: 'Flutter app runZoneGuarded');
     }
-    FlutterOTel.reportError('Error caught in run', error, stack, attributes: {
-      'error.source': 'zone_error',
-      'error.type': error.runtimeType.toString(),
-    });
+    FlutterOTel.reportError('Error caught in runZoneGuarded', error, stack,
+        attributes: {
+          ErrorSemantics.errorType.key: 'zone_error',
+          ErrorSemantics.errorType.key: error.runtimeType.toString(),
+        });
   });
 }
 
