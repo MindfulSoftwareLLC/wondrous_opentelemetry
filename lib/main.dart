@@ -47,89 +47,7 @@ void main() async {
       FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
     }
 
-    ///Flutterrific OTel initialization
-    /// TODO - Errors here dont get to uninitialized OTel
-    Map<String, Object> deviceAttrs = {};
-    var sessionId = DateTime.now(); //synthetic session id
-    final deviceInfoPlugin = DeviceInfoPlugin();
-    // TODO - complete per-platform semantics, conveniently
-    if (Platform.isAndroid) {
-      final deviceInfo = await deviceInfoPlugin.androidInfo;
-      deviceAttrs.addAll({
-        DeviceSemantics.deviceId.key: deviceInfo.id,
-        DeviceSemantics.deviceModel.key: deviceInfo.model,
-        DeviceSemantics.devicePlatform.key: deviceInfo.manufacturer,
-        DeviceSemantics.deviceOsVersion.key: deviceInfo.version,
-        DeviceSemantics.deviceModel.key: deviceInfo.device,
-        DeviceSemantics.isPhysicalDevice.key: deviceInfo.isPhysicalDevice,
-      });
-    } else if (Platform.isIOS) {
-      final deviceInfo = await deviceInfoPlugin.iosInfo;
-      deviceAttrs.addAll({
-        DeviceSemantics.deviceId.key: deviceInfo.identifierForVendor ?? 'no_id',
-        DeviceSemantics.deviceModel.key: deviceInfo.model,
-        DeviceSemantics.devicePlatform.key: deviceInfo.systemName,
-        DeviceSemantics.deviceOsVersion.key: deviceInfo.systemVersion,
-        DeviceSemantics.deviceModel.key: deviceInfo.isiOSAppOnMac,
-        DeviceSemantics.isPhysicalDevice.key: deviceInfo.isPhysicalDevice,
-      });
-    }
-
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
-    // Enable comprehensive logging for debugging metrics
-    // OTelLog.spanLogFunction = debugPrint;
-    // OTelLog.metricLogFunction = debugPrint;
-    // OTelLog.exportLogFunction = debugPrint;
-
-    // Create a manual periodic exporter that will flush metrics immediately
-    final otlpMetricExporter = OtlpGrpcMetricExporter(
-      OtlpGrpcMetricExporterConfig(
-        endpoint: endpoint,
-        insecure: !secure,
-      ),
-    );
-
-    // Configure a periodic manual reader with very short interval for mobile
-    final metricReader = PeriodicExportingMetricReader(
-      otlpMetricExporter,
-      interval: Duration(seconds: 1), // Export every second
-    );
-
-    await FlutterOTel.initialize(
-        serviceName: 'wondrous-flutterotel',
-        endpoint: endpoint,
-        secure: secure,
-        serviceVersion: '1.0.0',
-        //configures the default trace, consider making other tracers for isolates, etc.
-        tracerName: 'ui',
-        tracerVersion: '1.0.0',
-        metricExporter: otlpMetricExporter,
-        metricReader: metricReader,
-        //OTel standard tenant_id, required for Dartastic.io
-        tenantId: 'valued-saas-customer-id',
-        //required for the Dartastic.io backend
-        // dartasticApiKey: '123456',
-        resourceAttributes: <String, Object>{
-          // Always consult the OTel Semantic Conventions to find an existing
-          // convention name for an attribute.  Semantics are evolving.
-          // https://opentelemetry.io/docs/specs/semconv/
-          //--dart-define environment=dev
-          //See https://opentelemetry.io/docs/specs/semconv/resource/deployment-environment/
-          EnvironmentResource.deploymentEnvironment.key: 'dev',
-          ...deviceAttrs,
-          AppInfoSemantics.appName.key: packageInfo.appName,
-          AppInfoSemantics.appPackageName.key: packageInfo.packageName,
-          AppInfoSemantics.appVersion.key: packageInfo.version,
-          AppInfoSemantics.appBuildNumber.key: packageInfo.buildNumber,
-        }.toAttributes(),
-        commonAttributesFunction: () => <String, Object>{
-              // These attributes will usually change over time in a real app,
-              // ensure that no null values are included.
-              UserSemantics.userId.key: 'wondrousOTelUser1',
-              UserSemantics.userRole.key: 'demoUser',
-              UserSemantics.userSession.key: sessionId
-            }.toAttributes());
+    await initOTel();
 
     GoRouter.optionURLReflectsImperativeAPIs = true;
 
@@ -160,6 +78,91 @@ void main() async {
           ErrorSemantics.errorType.key: error.runtimeType.toString(),
         });
   });
+}
+
+Future<void> initOTel() async {
+   ///Flutterrific OTel initialization
+  OTelLog.currentLevel = LogLevel.trace;
+  OTelLog.spanLogFunction = debugPrint;
+  OTelLog.metricLogFunction = debugPrint;
+  Map<String, Object> deviceAttrs = {};
+  var sessionId = DateTime.now(); //synthetic session id
+  final deviceInfoPlugin = DeviceInfoPlugin();
+  // TODO - complete per-platform semantics, conveniently
+  if (!kIsWeb) {
+    if (Platform.isAndroid) {
+      final deviceInfo = await deviceInfoPlugin.androidInfo;
+      deviceAttrs.addAll({
+        DeviceSemantics.deviceId.key: deviceInfo.id,
+        DeviceSemantics.deviceModel.key: deviceInfo.model,
+        DeviceSemantics.devicePlatform.key: deviceInfo.manufacturer,
+        DeviceSemantics.deviceOsVersion.key: deviceInfo.version,
+        DeviceSemantics.deviceModel.key: deviceInfo.device,
+        DeviceSemantics.isPhysicalDevice.key: deviceInfo.isPhysicalDevice,
+      });
+    } else if (Platform.isIOS) {
+      final deviceInfo = await deviceInfoPlugin.iosInfo;
+      deviceAttrs.addAll({
+        DeviceSemantics.deviceId.key: deviceInfo.identifierForVendor ?? 'no_id',
+        DeviceSemantics.deviceModel.key: deviceInfo.model,
+        DeviceSemantics.devicePlatform.key: deviceInfo.systemName,
+        DeviceSemantics.deviceOsVersion.key: deviceInfo.systemVersion,
+        DeviceSemantics.deviceModel.key: deviceInfo.isiOSAppOnMac,
+        DeviceSemantics.isPhysicalDevice.key: deviceInfo.isPhysicalDevice,
+      });
+    }
+  }
+
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+  // Create a manual periodic exporter that will flush metrics immediately
+  final otlpMetricExporter = OtlpGrpcMetricExporter(
+    OtlpGrpcMetricExporterConfig(
+      endpoint: endpoint,
+      insecure: !secure,
+    ),
+  );
+
+  // Configure a periodic manual reader with very short interval for mobile
+  final metricReader = PeriodicExportingMetricReader(
+    otlpMetricExporter,
+    interval: Duration(seconds: 1), // Export every second
+  );
+
+  await FlutterOTel.initialize(
+      serviceName: 'wondrous-flutterotel',
+      endpoint: endpoint,
+      secure: secure,
+      serviceVersion: '1.0.0',
+      //configures the default trace, consider making other tracers for isolates, etc.
+      tracerName: 'ui',
+      tracerVersion: '1.0.0',
+      metricExporter: otlpMetricExporter,
+      metricReader: metricReader,
+      //OTel standard tenant_id, required for Dartastic.io
+      tenantId: 'valued-saas-customer-id',
+      //required for the Dartastic.io backend
+      // dartasticApiKey: '123456',
+      resourceAttributes: <String, Object>{
+        // Always consult the OTel Semantic Conventions to find an existing
+        // convention name for an attribute.  Semantics are evolving.
+        // https://opentelemetry.io/docs/specs/semconv/
+        //--dart-define environment=dev
+        //See https://opentelemetry.io/docs/specs/semconv/resource/deployment-environment/
+        EnvironmentResource.deploymentEnvironment.key: 'dev',
+        ...deviceAttrs,
+        AppInfoSemantics.appName.key: packageInfo.appName,
+        AppInfoSemantics.appPackageName.key: packageInfo.packageName,
+        AppInfoSemantics.appVersion.key: packageInfo.version,
+        AppInfoSemantics.appBuildNumber.key: packageInfo.buildNumber,
+      }.toAttributes(),
+      commonAttributesFunction: () => <String, Object>{
+            // These attributes will usually change over time in a real app,
+            // ensure that no null values are included.
+            UserSemantics.userId.key: 'wondrousOTelUser1',
+            UserSemantics.userRole.key: 'demoUser',
+            UserSemantics.userSession.key: sessionId
+          }.toAttributes());
 }
 
 /// Creates an app using the [MaterialApp.router] constructor and the global `appRouter`, an instance of [GoRouter].

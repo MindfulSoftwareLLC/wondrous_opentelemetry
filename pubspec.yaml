@@ -15,10 +15,11 @@ dependencies:
     sdk: flutter
 
   flutterrific_opentelemetry:
-    git: https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry.git
+    path: ../flutterrific_opentelemetry
+    #git: https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry.git
   #The rest of the dependencies are wonderous original dependencies
   collection: ^1.17.0
-  desktop_window: ^0.4.0
+  desktop_window: ^0.4.2
   # DARTASTIC: Added, TODO move to a enhanced wrapper
   device_info_plus: ^11.3.2
   battery_plus: ^6.2.1

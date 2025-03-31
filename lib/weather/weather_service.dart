@@ -4,7 +4,7 @@ import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:http/http.dart' as http;
 
 class WeatherService {
-  static const String apiKey = '3f4d6e7bf868e5d14487ff4c06466e36'; // Replace with actual OpenWeatherMap API key
+  static const String apiKey = '3f4d6e7bf868e5d14487ff4c06466e36'; // OpenWeatherMap API key
   final FlutterMetricReporter _reporter = FlutterMetricReporter();
 
   Future<Map<String, dynamic>> getWeatherForLocation(double lat, double lon) async {

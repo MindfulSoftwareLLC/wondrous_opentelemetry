@@ -137,12 +137,10 @@ packages:
   dartastic_opentelemetry:
     dependency: transitive
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: ea165f4d22ade172b747db4d9163b66195d6c877
-      url: "https://github.com/MindfulSoftwareLLC/dartastic_opentelemetry.git"
-    source: git
-    version: "1.0.0"
+      path: "../dartastic_opentelemetry"
+      relative: true
+    source: path
+    version: "1.0.1"
   dbus:
     dependency: transitive
     description:
@@ -163,10 +161,10 @@ packages:
     dependency: "direct main"
     description:
       name: desktop_window
-      sha256: "6256fb6feb7b5ec1311c76a3503f89202825bfe92c0458ec5fe7a728ffa216d5"
+      sha256: d0590e75a0a8f91245b439fb7f2bf0ebb62d9cd9fdc7aa0622a5d50615c46845
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.4.2"
   device_info_plus:
     dependency: "direct main"
     description:
@@ -330,11 +328,9 @@ packages:
   flutterrific_opentelemetry:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: ab67b9cd74f7a0caf51ad30289e22e0ddaf45d7c
-      url: "https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry.git"
-    source: git
+      path: "../flutterrific_opentelemetry"
+      relative: true
+    source: path
     version: "1.0.0"
   functional_listener:
     dependency: transitive
@@ -452,10 +448,10 @@ packages:
     dependency: transitive
     description:
       name: grpc
-      sha256: "5b99b7a420937d4361ece68b798c9af8e04b5bc128a7859f2a4be87427694813"
+      sha256: e93ee3bce45c134bf44e9728119102358c7cd69de7832d9a874e2e74eb8cab40
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.1"
+    version: "3.2.4"
   home_widget:
     dependency: "direct main"
     description:
@@ -603,12 +599,10 @@ packages:
   opentelemetry_api:
     dependency: transitive
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "4de882a19f9222d6d815c4dab8c4933cd2ce35b6"
-      url: "https://github.com/MindfulSoftwareLLC/opentelemetry_api.git"
-    source: git
-    version: "1.0.1"
+      path: "../opentelemetry_api"
+      relative: true
+    source: path
+    version: "0.8.0"
   package_config:
     dependency: transitive
     description:
