@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/metrics/wonder_metrics.dart';
-import 'package:wonders/metrics/wonder_metrics_observer.dart';
 import 'package:wonders/ui/common/modals//fullscreen_video_viewer.dart';
 import 'package:wonders/ui/common/modals/fullscreen_maps_viewer.dart';
 import 'package:wonders/ui/screens/artifact/artifact_details/artifact_details_screen.dart';

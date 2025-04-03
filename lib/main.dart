@@ -19,10 +19,7 @@ import 'package:wonders/ui/common/app_shortcuts.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
-// TODO - shouldn't be necessary
-import 'package:opentelemetry_api/opentelemetry_api.dart';
-
-const endpoint = 'http://ec2-3-139-70-11.us-east-2.compute.amazonaws.com:4317';
+const endpoint = 'http://localhost:4317';
 const secure = false;
 
 void main() async {
@@ -31,14 +28,19 @@ void main() async {
       FlutterError.dumpErrorToConsole(details);
     }
 
-    // Report error to both spans and metrics
-    FlutterOTel.reportError(
-        'FlutterError.onError', details.exception, details.stack,
-        attributes: {
-          ErrorSemantics.errorSource.key: 'flutter_error',
-          ErrorSemantics.errorType.key:
-              details.exception.runtimeType.toString(),
-        });
+    try {
+      FlutterOTel.reportError(
+          'FlutterError.onError', details.exception, details.stack,
+          attributes: {
+            ErrorSemantics.errorSource.key: 'flutter_error',
+            ErrorSemantics.errorType.key:
+            details.exception.runtimeType.toString(),
+          });
+    } catch (e, s) {
+      print('Unreported: $e , $s');
+      debugPrint('$e');
+      debugPrintStack(stackTrace: s, label: 'Flutter app reportError');
+    }
   };
 
   runZonedGuarded(() async {
@@ -82,6 +84,7 @@ void main() async {
 
 Future<void> initOTel() async {
    ///Flutterrific OTel initialization
+  ///Extensive logging because this is the example
   OTelLog.currentLevel = LogLevel.trace;
   OTelLog.spanLogFunction = debugPrint;
   OTelLog.metricLogFunction = debugPrint;
@@ -123,11 +126,14 @@ Future<void> initOTel() async {
     ),
   );
 
-  // Configure a periodic manual reader with very short interval for mobile
+  // Configure a periodic manual reader with short interval for mobile
   final metricReader = PeriodicExportingMetricReader(
     otlpMetricExporter,
-    interval: Duration(seconds: 1), // Export every second
+    // Export every 5 second only in debug - friends don't
+    // do this to customer's batteries.
+    interval: kDebugMode ? Duration(seconds: 2) : Duration(minutes: 10),
   );
+
 
   await FlutterOTel.initialize(
       serviceName: 'wondrous-flutterotel',
