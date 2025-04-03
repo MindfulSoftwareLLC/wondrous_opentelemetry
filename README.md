@@ -3,6 +3,22 @@
 This is a fork of the Wondrous app that adds OpenTelemetry
 via [Flutterific OTel](https://pub.dev/flutterific_otel) and [Dartastic.io](https://dartastic.io)
 
+To try this instrumented Wondrous against a local OpenTelemetry stack, run grafana locally through docker and go to localhost:3000 and sign in as admin/admin.
+```
+docker run -p 3000:3000 -p 4317:4317 -p 4318:4318 --rm -ti grafana/otel-lgtm
+```
+
+Play around with the app and you'll see Metrics (under Drilldown).
+
+![img.png](grafana-metrics.png)
+
+
+Traces can be found under Explore, Choose Tempo, a reasonable time (Last 1 hr), and for the Query Type, click Search.
+![img.png](grafana-traces.png)
+
+
+Thank you to the fabulous designers and developers of Wondrous.
+
 # Wonderous 
 <p align="center">
 <img width="215" src="https://user-images.githubusercontent.com/736973/187334196-b79e48b2-dbb8-4ea7-8aac-04dbc7e5159f.png#gh-dark-mode-only">

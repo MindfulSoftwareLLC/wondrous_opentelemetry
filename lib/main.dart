@@ -19,7 +19,11 @@ import 'package:wonders/ui/common/app_shortcuts.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
-const endpoint = 'http://localhost:4317';
+/// Use the standard env var or default to localhost
+/// To try localhost use:
+/// docker run -p 3000:3000 -p 4317:4317 -p 4318:4318 --rm -ti grafana/otel-lgtm
+const endpoint = String.fromEnvironment('OTEL_EXPORTER_OTLP_ENDPOINT',
+    defaultValue: 'http://localhost:4317');
 const secure = false;
 
 void main() async {
@@ -34,7 +38,7 @@ void main() async {
           attributes: {
             ErrorSemantics.errorSource.key: 'flutter_error',
             ErrorSemantics.errorType.key:
-            details.exception.runtimeType.toString(),
+                details.exception.runtimeType.toString(),
           });
     } catch (e, s) {
       print('Unreported: $e , $s');
@@ -83,7 +87,7 @@ void main() async {
 }
 
 Future<void> initOTel() async {
-   ///Flutterrific OTel initialization
+  ///Flutterrific OTel initialization
   ///Extensive logging because this is the example
   OTelLog.currentLevel = LogLevel.trace;
   OTelLog.spanLogFunction = debugPrint;
@@ -133,7 +137,6 @@ Future<void> initOTel() async {
     // do this to customer's batteries.
     interval: kDebugMode ? Duration(seconds: 2) : Duration(minutes: 10),
   );
-
 
   await FlutterOTel.initialize(
       serviceName: 'wondrous-flutterotel',
