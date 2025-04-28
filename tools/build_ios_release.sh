@@ -1,2 +1,2 @@
 #!/bin/bash
-flutter build ios --obfuscate --split-debug-info=/debug-symbols
+flutter build ios --obfuscate --split-debug-info=./debug-symbols 

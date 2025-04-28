@@ -1,14 +1,14 @@
 *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
-*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** 
-pid: 16380, tid: 487890366624, name 1.ui 
-os: android 
-arch: arm64 
-comp: yes 
-sim: no 
-build_id: 'cde83d06f254073eccbd75adde5be1b9' 
-isolate_dso_base: 6e1906a000, 
-vm_dso_base: 6e1906a000 
-isolate_instructions: 6e192b0a40, 
-vm_instructions: 6e1929a000 
-#00 abs 0000006e1974e903 virt 00000000006e4903 _kDartIsolateSnapshotInstructions+0x49dec3 <asynchronous suspension> 
-#01 abs 0000006e1974dfbb virt 00000000006e3fbb _kDartIsolateSnapshotInstructions+0x49d57b <asynchronous suspension>
+pid: 9570, tid: 496169316512, name 1.ui
+os: android arch: arm64 comp: yes sim: no
+build_id: 'cde83d06f254073eccbd75adde5be1b9'
+isolate_dso_base: 7017edc000, vm_dso_base: 7017edc000
+isolate_instructions: 7018122a40, vm_instructions: 701810c000
+    #00 abs 00000070185c16c3 virt 00000000006e56c3 _kDartIsolateSnapshotInstructions+0x49ec83
+<asynchronous suspension>
+    #01 abs 00000070185c107f virt 00000000006e507f _kDartIsolateSnapshotInstructions+0x49e63f
+<asynchronous suspension>
+    #02 abs 00000070185c03a7 virt 00000000006e43a7 _kDartIsolateSnapshotInstructions+0x49d967
+<asynchronous suspension>
+    #03 abs 00000070185bffbb virt 00000000006e3fbb _kDartIsolateSnapshotInstructions+0x49d57b
+<asynchronous suspension>

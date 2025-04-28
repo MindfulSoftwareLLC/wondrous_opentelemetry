@@ -1,6 +1,4 @@
 PODS:
-  - battery_plus (1.0.0):
-    - Flutter
   - device_info_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
@@ -36,7 +34,6 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
-  - battery_plus (from `.symlinks/plugins/battery_plus/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
@@ -55,8 +52,6 @@ SPEC REPOS:
     - GoogleMaps
 
 EXTERNAL SOURCES:
-  battery_plus:
-    :path: ".symlinks/plugins/battery_plus/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
@@ -81,7 +76,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
 SPEC CHECKSUMS:
-  battery_plus: b42253f6d2dde71712f8c36fef456d99121c5977
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_native_splash: 35ddbc7228eafcb3969dcc5f1fbbe27c1145a4f0

@@ -3,7 +3,7 @@ import 'package:wonders/logic/common/platform_info.dart';
 
 /// Small facade for the HomeWidget package
 class NativeWidgetService {
-  static const _iosAppGroupId = 'group.com.gskinner.flutter.wonders.widget';
+  static const _iosAppGroupId = 'group.com.mindfulsoftware.otel.wonders.widget';
   static const _iosAppName = 'WonderousWidget';
 
   final bool isSupported = PlatformInfo.isIOS;

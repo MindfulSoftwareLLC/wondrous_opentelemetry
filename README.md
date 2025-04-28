@@ -37,7 +37,7 @@ In addition to forking and reviewing the [MIT licensed](LICENSE) code available 
 # App Downloads
 
 To try the app you can download it from your favorite app store:
-* [Google Play](https://play.google.com/store/apps/details?id=com.gskinner.flutter.wonders)
+* [Google Play](https://play.google.com/store/apps/details?id=com.mindfulsoftware.otel.wonders)
 * [Apple App Store](https://apps.apple.com/us/app/wonderous/id1612491897)
 
 Or you can try it on the web at https://wonderous.app/web/

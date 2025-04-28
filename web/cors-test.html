@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OTLP CORS Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    pre {
+      background-color: #f4f4f4;
+      padding: 15px;
+      border-radius: 4px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>OTLP HTTP CORS Test</h1>
+  <p>This tool tests if your OTLP collector at 88.99.244.251:4318 has CORS properly configured.</p>
+  
+  <button id="testCors">Test CORS Configuration</button>
+  <div id="result" style="margin-top: 20px;">
+    <h3>Result:</h3>
+    <pre id="resultOutput">Click the button to test CORS...</pre>
+  </div>
+
+  <script>
+    document.getElementById('testCors').addEventListener('click', async () => {
+      const resultOutput = document.getElementById('resultOutput');
+      
+      try {
+        resultOutput.textContent = 'Making preflight request to http://88.99.244.251:4318/v1/traces...';
+        
+        // Options for the fetch request
+        const options = {
+          method: 'OPTIONS',
+          headers: {
+            'Access-Control-Request-Method': 'POST',
+            'Access-Control-Request-Headers': 'content-type',
+            'Origin': window.location.origin
+          }
+        };
+        
+        // Make the OPTIONS preflight request
+        const response = await fetch('http://88.99.244.251:4318/v1/traces', options);
+        
+        // Check if the response includes the necessary CORS headers
+        const corsHeaders = {
+          'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+          'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+          'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+        };
+        
+        resultOutput.textContent = 'Preflight request completed!\n\nCORS Headers:\n' + 
+          JSON.stringify(corsHeaders, null, 2) + 
+          '\n\nStatus: ' + (corsHeaders['Access-Control-Allow-Origin'] ? 'CORS is configured correctly ✅' : 'CORS configuration issue ❌');
+          
+      } catch (error) {
+        resultOutput.textContent = 'Error testing CORS:\n' + error.toString();
+      }
+    });
+  </script>
+</body>
+</html>

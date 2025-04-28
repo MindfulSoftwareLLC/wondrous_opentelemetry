@@ -19,12 +19,26 @@ import 'package:wonders/ui/common/app_shortcuts.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
-/// Use the standard env var or default to localhost
-/// To try localhost use:
-/// docker run -p 3000:3000 -p 4317:4317 -p 4318:4318 --rm -ti grafana/otel-lgtm
-const endpoint = String.fromEnvironment('OTEL_EXPORTER_OTLP_ENDPOINT',
-    defaultValue: 'http://localhost:4317');
-const secure = false;
+
+const otelLocalHostDefault = 'http://localhost:4317';
+const otelRemoteEndpoint = 'http://88.99.244.251:4318'; // For Web
+
+/// How to point to an OTel backend:
+/// Do nothing and it defaults to localhost:4317 grpc or localhost:4318 HTTP for web
+/// Try it on your localhost with docker
+/// against a Grafana OTel backend:
+/// `docker run -p 3000:3000 -p 4317:4317 -p 4318:4318 --rm -ti grafana/otel-lgtm`
+///
+/// To point it to your own OTel collector, use
+/// these standard OpenTelemetry environmental variables:
+/// --dart-define=OTEL_EXPORTER_OTLP_ENDPOINT=myelasticcloud.com
+/// --dart-define=OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf  (for web)
+/// or
+/// --dart-define=OTEL_EXPORTER_OTLP_PROTOCOL=grpc  (for native)
+///
+/// The SDK will automatically select HTTP/protobuf for Flutter Web
+/// and gRPC for other platforms, but you can override this with
+/// the OTEL_EXPORTER_OTLP_PROTOCOL environment variable.
 
 void main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -87,11 +101,16 @@ void main() async {
 }
 
 Future<void> initOTel() async {
-  ///Flutterrific OTel initialization
-  ///Extensive logging because this is the example
+  /// Flutterrific OTel initialization
+  /// Extensive logging because this is an example,
+  /// Usually you can leave the internal logging alone
   OTelLog.currentLevel = LogLevel.trace;
   OTelLog.spanLogFunction = debugPrint;
   OTelLog.metricLogFunction = debugPrint;
+
+  // Print platform info for debugging
+  debugPrint('kIsWeb: $kIsWeb');
+
   Map<String, Object> deviceAttrs = {};
   var sessionId = DateTime.now(); //synthetic session id
   final deviceInfoPlugin = DeviceInfoPlugin();
@@ -122,37 +141,25 @@ Future<void> initOTel() async {
 
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
-  // Create a manual periodic exporter that will flush metrics immediately
-  final otlpMetricExporter = OtlpGrpcMetricExporter(
-    OtlpGrpcMetricExporterConfig(
-      endpoint: endpoint,
-      insecure: !secure,
-    ),
-  );
+  // No need to create manual metric exporters or readers
+  // FlutterOTel.initialize will handle this automatically
 
-  // Configure a periodic manual reader with short interval for mobile
-  final metricReader = PeriodicExportingMetricReader(
-    otlpMetricExporter,
-    // Export every 5 second only in debug - friends don't
-    // do this to customer's batteries.
-    interval: kDebugMode ? Duration(seconds: 2) : Duration(minutes: 10),
-  );
-
+  // Configure the appropriate endpoint based on platform
+  String endpoint = kIsWeb ? otelRemoteEndpoint : otelLocalHostDefault;
+  debugPrint('Using OpenTelemetry endpoint: $endpoint');
+    
   await FlutterOTel.initialize(
       serviceName: 'wondrous-flutterotel',
-      endpoint: endpoint,
-      secure: secure,
       serviceVersion: '1.0.0',
       //configures the default trace, consider making other tracers for isolates, etc.
       tracerName: 'ui',
       tracerVersion: '1.0.0',
-      metricExporter: otlpMetricExporter,
-      metricReader: metricReader,
       //OTel standard tenant_id, required for Dartastic.io
       tenantId: 'valued-saas-customer-id',
       //required for the Dartastic.io backend
       // dartasticApiKey: '123456',
-      resourceAttributes: <String, Object>{
+      endpoint: endpoint,
+      resourceAttributes: Attributes.of({
         // Always consult the OTel Semantic Conventions to find an existing
         // convention name for an attribute.  Semantics are evolving.
         // https://opentelemetry.io/docs/specs/semconv/
@@ -164,14 +171,14 @@ Future<void> initOTel() async {
         AppInfoSemantics.appPackageName.key: packageInfo.packageName,
         AppInfoSemantics.appVersion.key: packageInfo.version,
         AppInfoSemantics.appBuildNumber.key: packageInfo.buildNumber,
-      }.toAttributes(),
-      commonAttributesFunction: () => <String, Object>{
+      }),
+      commonAttributesFunction: () => Attributes.of({
             // These attributes will usually change over time in a real app,
             // ensure that no null values are included.
             UserSemantics.userId.key: 'wondrousOTelUser1',
             UserSemantics.userRole.key: 'demoUser',
             UserSemantics.userSession.key: sessionId
-          }.toAttributes());
+          }));
 }
 
 /// Creates an app using the [MaterialApp.router] constructor and the global `appRouter`, an instance of [GoRouter].

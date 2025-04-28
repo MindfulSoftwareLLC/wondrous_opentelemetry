@@ -28,7 +28,7 @@ struct WonderousWidget: Widget {
 }
 
 struct WonderousConfig {
-    let iosKey = "group.com.gskinner.flutter.wonders.widget"
+    let iosKey = "group.com.mindfulsoftware.otel.wonders.widget"
     let discoveredCountKey = "dicoveredCount"
 }
 
@@ -42,7 +42,7 @@ struct WonderousTimelineProvider: TimelineProvider {
     // Provide an entry for the current time and state of the widget
     func getSnapshot(in context: Context, completion: @escaping (WonderousTimelineEntry) -> ()) {
         let entry:WonderousTimelineEntry
-        let userDefaults = UserDefaults(suiteName: "group.com.gskinner.flutter.wonders.widget")
+        let userDefaults = UserDefaults(suiteName: "group.com.mindfulsoftware.otel.wonders.widget")
         let discoveredCount = userDefaults?.integer(forKey: "discoveredCount") ?? 0
         let title = userDefaults?.string(forKey: "lastDiscoveredTitle") ?? ""
         let subTitle = userDefaults?.string(forKey: "lastDiscoveredSubTitle") ?? ""
