@@ -1,5 +1,5 @@
-import 'package:wonders/common_libs.dart';
-import 'package:wonders/ui/common/app_icons.dart';
+import 'package:wonders_opentelemetry/common_libs.dart';
+import 'package:wonders_opentelemetry/ui/common/app_icons.dart';
 
 /// Shared methods across button types
 Widget _buildIcon(BuildContext context, AppIcons icon, {required bool isSecondary, required double? size}) =>

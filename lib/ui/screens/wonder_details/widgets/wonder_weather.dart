@@ -2,11 +2,11 @@ import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
-import 'package:wonders/common_libs.dart';
-import 'package:wonders/logic/data/wonder_data.dart';
-import 'package:wonders/logic/data/wonder_locations.dart';
-import 'package:wonders/main.dart';
-import 'package:wonders/weather/dartastic_weather_service.dart';
+import 'package:wonders_opentelemetry/common_libs.dart';
+import 'package:wonders_opentelemetry/logic/data/wonder_data.dart';
+import 'package:wonders_opentelemetry/logic/data/wonder_locations.dart';
+import 'package:wonders_opentelemetry/main.dart';
+import 'package:wonders_opentelemetry/weather/dartastic_weather_service.dart';
 
 class WonderWeather extends StatefulWidget {
   final WonderData data;

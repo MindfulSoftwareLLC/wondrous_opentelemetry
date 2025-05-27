@@ -1,11 +1,11 @@
-name: wonders
+name: wonders_opentelemetry
 description: Explore the famous wonders of the world - Observed with Dartastic.io.
 publish_to: "none"
 version: 5.0.0
 
 environment:
   sdk: ^3.3.0
-  flutter: ^3.23.0
+  flutter: ^3.29.0
 
 dependencies:
   flutter:
@@ -14,9 +14,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  flutterrific_opentelemetry:
-    path: ../flutterrific_opentelemetry
-    #git: https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry.git
+  flutterrific_opentelemetry: ^0.3.0
   #The rest of the dependencies are wonderous original dependencies
   collection: ^1.17.0
   desktop_window: ^0.4.2

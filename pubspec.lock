@@ -121,10 +121,19 @@ packages:
   dartastic_opentelemetry:
     dependency: transitive
     description:
-      path: "../dartastic_opentelemetry"
-      relative: true
-    source: path
-    version: "1.0.1"
+      name: dartastic_opentelemetry
+      sha256: bf86d3a85ed5706b7a8f8438bfbe485e38b698ad61a4295c2aaa3becfc567287
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.1"
+  dartastic_opentelemetry_api:
+    dependency: transitive
+    description:
+      name: dartastic_opentelemetry_api
+      sha256: "55a5a228f3bffc6dd42e5d672324389507ff5974574d16a102f64233ed2566a9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.0"
   dependency_validator:
     dependency: "direct dev"
     description:
@@ -304,10 +313,11 @@ packages:
   flutterrific_opentelemetry:
     dependency: "direct main"
     description:
-      path: "../flutterrific_opentelemetry"
-      relative: true
-    source: path
-    version: "1.0.0"
+      name: flutterrific_opentelemetry
+      sha256: "2e87afc77299e8fd01f7576dc7116e4c2671ceb80b41c4c045de0e45a025bd3a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
   functional_listener:
     dependency: transitive
     description:
@@ -428,15 +438,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.4"
-  gzip:
-    dependency: transitive
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: d672a844802234260e80ec4ae0017a685b9c74bf
-      url: "https://github.com/mosuem/gzip.git"
-    source: git
-    version: "0.3.0"
   home_widget:
     dependency: "direct main"
     description:
@@ -457,10 +458,10 @@ packages:
     dependency: "direct main"
     description:
       name: http
-      sha256: b9c29a161230ee03d3ccf545097fccd9b87a5264228c5d348202e0f0c28f9010
+      sha256: fe7ab022b76f3034adc518fb6ea04a82387620e19977665ea18d30a1cf43442f
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.2"
+    version: "1.3.0"
   http2:
     dependency: transitive
     description:
@@ -581,13 +582,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-  opentelemetry_api:
-    dependency: transitive
-    description:
-      path: "../opentelemetry_api"
-      relative: true
-    source: path
-    version: "0.8.0"
   package_config:
     dependency: transitive
     description:
@@ -1155,4 +1149,4 @@ packages:
     version: "3.1.0"
 sdks:
   dart: ">=3.7.0 <4.0.0"
-  flutter: ">=3.24.0"
+  flutter: ">=3.29.0"

@@ -6,22 +6,21 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:wonders/common_libs.dart';
-import 'package:wonders/logic/artifact_api_logic.dart';
-import 'package:wonders/logic/artifact_api_service.dart';
-import 'package:wonders/logic/collectibles_logic.dart';
-import 'package:wonders/logic/locale_logic.dart';
-import 'package:wonders/logic/native_widget_service.dart';
-import 'package:wonders/logic/timeline_logic.dart';
-import 'package:wonders/logic/unsplash_logic.dart';
-import 'package:wonders/logic/wonders_logic.dart';
-import 'package:wonders/ui/common/app_shortcuts.dart';
+import 'package:wonders_opentelemetry/common_libs.dart';
+import 'package:wonders_opentelemetry/logic/artifact_api_logic.dart';
+import 'package:wonders_opentelemetry/logic/artifact_api_service.dart';
+import 'package:wonders_opentelemetry/logic/collectibles_logic.dart';
+import 'package:wonders_opentelemetry/logic/locale_logic.dart';
+import 'package:wonders_opentelemetry/logic/native_widget_service.dart';
+import 'package:wonders_opentelemetry/logic/timeline_logic.dart';
+import 'package:wonders_opentelemetry/logic/unsplash_logic.dart';
+import 'package:wonders_opentelemetry/logic/wonders_logic.dart';
+import 'package:wonders_opentelemetry/ui/common/app_shortcuts.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
 
 const otelLocalHostDefault = 'http://localhost:4317';
-const otelRemoteEndpoint = 'http://88.99.244.251:4318'; // For Web
 
 /// How to point to an OTel backend:
 /// Do nothing and it defaults to localhost:4317 grpc or localhost:4318 HTTP for web
@@ -77,7 +76,7 @@ void main() async {
     // Set up a periodic timer to flush metrics every few seconds
     Timer.periodic(Duration(seconds: 5), (_) {
       if (OTelLog.isLogMetrics()) {
-        OTelLog.logMetric("Periodic metrics flush");
+        OTelLog.logMetric('Periodic metrics flush');
       }
       OTel.meterProvider().forceFlush();
     });
@@ -104,9 +103,9 @@ Future<void> initOTel() async {
   /// Flutterrific OTel initialization
   /// Extensive logging because this is an example,
   /// Usually you can leave the internal logging alone
-  OTelLog.currentLevel = LogLevel.trace;
-  OTelLog.spanLogFunction = debugPrint;
-  OTelLog.metricLogFunction = debugPrint;
+  // OTelLog.currentLevel = LogLevel.trace;
+  // OTelLog.spanLogFunction = debugPrint;
+  // OTelLog.metricLogFunction = debugPrint;
 
   // Print platform info for debugging
   debugPrint('kIsWeb: $kIsWeb');
@@ -145,7 +144,7 @@ Future<void> initOTel() async {
   // FlutterOTel.initialize will handle this automatically
 
   // Configure the appropriate endpoint based on platform
-  String endpoint = kIsWeb ? otelRemoteEndpoint : otelLocalHostDefault;
+  String endpoint = otelLocalHostDefault;
   debugPrint('Using OpenTelemetry endpoint: $endpoint');
     
   await FlutterOTel.initialize(
@@ -208,7 +207,7 @@ class _WondersAppState extends State<WondersApp> with GetItStateMixin {
     OTel.tracerProvider().forceFlush();
 
     if (OTelLog.isLogMetrics()) {
-      OTelLog.logMetric("Flushing metrics before app dispose");
+      OTelLog.logMetric('Flushing metrics before app dispose');
     }
 
     super.dispose();

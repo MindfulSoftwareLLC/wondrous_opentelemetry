@@ -1,9 +1,9 @@
-import 'package:wonders/common_libs.dart';
-import 'package:wonders/logic/collectibles_logic.dart';
-import 'package:wonders/logic/data/collectible_data.dart';
-import 'package:wonders/ui/common/opening_card.dart';
-import 'package:wonders/ui/common/utils/app_haptics.dart';
-import 'package:wonders/ui/screens/collectible_found/collectible_found_screen.dart';
+import 'package:wonders_opentelemetry/common_libs.dart';
+import 'package:wonders_opentelemetry/logic/collectibles_logic.dart';
+import 'package:wonders_opentelemetry/logic/data/collectible_data.dart';
+import 'package:wonders_opentelemetry/ui/common/opening_card.dart';
+import 'package:wonders_opentelemetry/ui/common/utils/app_haptics.dart';
+import 'package:wonders_opentelemetry/ui/screens/collectible_found/collectible_found_screen.dart';
 
 class CollectibleItem extends StatelessWidget with GetItMixin {
   CollectibleItem(this.collectible, {this.size = 64.0, super.key, this.focus}) {

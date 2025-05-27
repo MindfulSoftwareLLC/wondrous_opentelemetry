@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wonders/common_libs.dart';
-import 'package:wonders/logic/common/platform_info.dart';
-import 'package:wonders/ui/common/modals/fullscreen_web_view.dart';
+import 'package:wonders_opentelemetry/common_libs.dart';
+import 'package:wonders_opentelemetry/logic/common/platform_info.dart';
+import 'package:wonders_opentelemetry/ui/common/modals/fullscreen_web_view.dart';
 
 class AboutDialogContent extends StatelessWidget {
   const AboutDialogContent({super.key});

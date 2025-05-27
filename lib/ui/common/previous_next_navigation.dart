@@ -1,8 +1,8 @@
 import 'package:flutter/gestures.dart';
-import 'package:wonders/common_libs.dart';
-import 'package:wonders/logic/common/platform_info.dart';
-import 'package:wonders/ui/common/app_icons.dart';
-import 'package:wonders/ui/common/fullscreen_keyboard_listener.dart';
+import 'package:wonders_opentelemetry/common_libs.dart';
+import 'package:wonders_opentelemetry/logic/common/platform_info.dart';
+import 'package:wonders_opentelemetry/ui/common/app_icons.dart';
+import 'package:wonders_opentelemetry/ui/common/fullscreen_keyboard_listener.dart';
 
 class PreviousNextNavigation extends StatefulWidget {
   const PreviousNextNavigation(

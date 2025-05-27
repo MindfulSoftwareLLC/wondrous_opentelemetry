@@ -1,6 +1,6 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:wonders/common_libs.dart';
-import 'package:wonders/logic/common/platform_info.dart';
+import 'package:wonders_opentelemetry/common_libs.dart';
+import 'package:wonders_opentelemetry/logic/common/platform_info.dart';
 
 /// Loads bitmap assets into memory that may be required later
 class AppBitmaps {

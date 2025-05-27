@@ -1,5 +1,5 @@
-import 'package:wonders/_tools/unsplash_download_service.dart';
-import 'package:wonders/logic/common/platform_info.dart';
+import 'package:wonders_opentelemetry/_tools/unsplash_download_service.dart';
+import 'package:wonders_opentelemetry/logic/common/platform_info.dart';
 
 enum UnsplashPhotoSize { med, large, xl }
 

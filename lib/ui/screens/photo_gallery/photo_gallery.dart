@@ -2,16 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
-import 'package:opentelemetry_api/opentelemetry_api.dart' show InteractionType;
-import 'package:wonders/common_libs.dart';
-import 'package:wonders/logic/data/unsplash_photo_data.dart';
-import 'package:wonders/ui/common/controls/app_loading_indicator.dart';
-import 'package:wonders/ui/common/controls/eight_way_swipe_detector.dart';
-import 'package:wonders/ui/common/fullscreen_keyboard_listener.dart';
-import 'package:wonders/ui/common/hidden_collectible.dart';
-import 'package:wonders/ui/common/modals/fullscreen_url_img_viewer.dart';
-import 'package:wonders/ui/common/unsplash_photo.dart';
-import 'package:wonders/ui/common/utils/app_haptics.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart' show InteractionType;
+import 'package:wonders_opentelemetry/common_libs.dart';
+import 'package:wonders_opentelemetry/logic/data/unsplash_photo_data.dart';
+import 'package:wonders_opentelemetry/ui/common/controls/app_loading_indicator.dart';
+import 'package:wonders_opentelemetry/ui/common/controls/eight_way_swipe_detector.dart';
+import 'package:wonders_opentelemetry/ui/common/fullscreen_keyboard_listener.dart';
+import 'package:wonders_opentelemetry/ui/common/hidden_collectible.dart';
+import 'package:wonders_opentelemetry/ui/common/modals/fullscreen_url_img_viewer.dart';
+import 'package:wonders_opentelemetry/ui/common/unsplash_photo.dart';
+import 'package:wonders_opentelemetry/ui/common/utils/app_haptics.dart';
 
 part 'widgets/_animated_cutout_overlay.dart';
 

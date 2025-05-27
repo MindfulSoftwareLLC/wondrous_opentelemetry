@@ -1,5 +1,5 @@
-import 'package:wonders/common_libs.dart';
-import 'package:wonders/logic/data/timeline_data.dart';
+import 'package:wonders_opentelemetry/common_libs.dart';
+import 'package:wonders_opentelemetry/logic/data/timeline_data.dart';
 
 class TimelineLogic {
   List<TimelineEvent> events = [];

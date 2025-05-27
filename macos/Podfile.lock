@@ -1,6 +1,4 @@
 PODS:
-  - battery_plus (0.0.1):
-    - FlutterMacOS
   - desktop_window (0.0.1):
     - FlutterMacOS
   - device_info_plus (0.0.1):
@@ -21,7 +19,6 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
-  - battery_plus (from `Flutter/ephemeral/.symlinks/plugins/battery_plus/macos`)
   - desktop_window (from `Flutter/ephemeral/.symlinks/plugins/desktop_window/macos`)
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
@@ -32,8 +29,6 @@ DEPENDENCIES:
   - webview_flutter_wkwebview (from `Flutter/ephemeral/.symlinks/plugins/webview_flutter_wkwebview/darwin`)
 
 EXTERNAL SOURCES:
-  battery_plus:
-    :path: Flutter/ephemeral/.symlinks/plugins/battery_plus/macos
   desktop_window:
     :path: Flutter/ephemeral/.symlinks/plugins/desktop_window/macos
   device_info_plus:
@@ -52,7 +47,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/webview_flutter_wkwebview/darwin
 
 SPEC CHECKSUMS:
-  battery_plus: f51ad29136e025b714b96f7d096f44f604615da7
   desktop_window: de6acd6053564bdccd9f4b9473d25bf4f2ad9bdf
   device_info_plus: 4fb280989f669696856f8b129e4a5e3cd6c48f76
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24

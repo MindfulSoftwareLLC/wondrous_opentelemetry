@@ -1,4 +1,4 @@
-import 'package:wonders/common_libs.dart';
+import 'package:wonders_opentelemetry/common_libs.dart';
 
 /// Easily add visual decorations to a scrolling widget based on the state of its controller.
 class ScrollDecorator extends StatefulWidget {

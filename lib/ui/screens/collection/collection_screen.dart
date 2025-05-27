@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:wonders/common_libs.dart';
-import 'package:wonders/logic/collectibles_logic.dart';
-import 'package:wonders/logic/data/collectible_data.dart';
-import 'package:wonders/logic/data/wonder_data.dart';
-import 'package:wonders/ui/common/centered_box.dart';
-import 'package:wonders/ui/common/controls/app_header.dart';
-import 'package:wonders/ui/common/modals/app_modals.dart';
+import 'package:wonders_opentelemetry/common_libs.dart';
+import 'package:wonders_opentelemetry/logic/collectibles_logic.dart';
+import 'package:wonders_opentelemetry/logic/data/collectible_data.dart';
+import 'package:wonders_opentelemetry/logic/data/wonder_data.dart';
+import 'package:wonders_opentelemetry/ui/common/centered_box.dart';
+import 'package:wonders_opentelemetry/ui/common/controls/app_header.dart';
+import 'package:wonders_opentelemetry/ui/common/modals/app_modals.dart';
 
 part 'widgets/_collectible_image.dart';
 part 'widgets/_collection_footer.dart';

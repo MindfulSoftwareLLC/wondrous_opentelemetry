@@ -1,10 +1,10 @@
-import 'package:wonders/common_libs.dart';
-import 'package:wonders/logic/data/artifact_data.dart';
-import 'package:wonders/ui/common/compass_divider.dart';
-import 'package:wonders/ui/common/controls/app_header.dart';
-import 'package:wonders/ui/common/controls/app_loading_indicator.dart';
-import 'package:wonders/ui/common/gradient_container.dart';
-import 'package:wonders/ui/common/modals/fullscreen_url_img_viewer.dart';
+import 'package:wonders_opentelemetry/common_libs.dart';
+import 'package:wonders_opentelemetry/logic/data/artifact_data.dart';
+import 'package:wonders_opentelemetry/ui/common/compass_divider.dart';
+import 'package:wonders_opentelemetry/ui/common/controls/app_header.dart';
+import 'package:wonders_opentelemetry/ui/common/controls/app_loading_indicator.dart';
+import 'package:wonders_opentelemetry/ui/common/gradient_container.dart';
+import 'package:wonders_opentelemetry/ui/common/modals/fullscreen_url_img_viewer.dart';
 
 part 'widgets/_artifact_image_btn.dart';
 part 'widgets/_info_column.dart';
