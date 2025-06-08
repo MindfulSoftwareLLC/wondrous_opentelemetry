@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -17,22 +18,27 @@ import 'package:wonders/logic/wonders_logic.dart';
 import 'package:wonders/ui/common/app_shortcuts.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-
-const endpoint = 'http://ec2-3-139-70-11.us-east-2.compute.amazonaws.com:4317';
-const secure = false;
+import 'package:flutterrific_opentelemetry/src/util/otel_config.dart';
 
 void main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
     if (kDebugMode) {
       FlutterError.dumpErrorToConsole(details);
     }
-    // Report error to both spans and metrics
-    FlutterOTel.reportError(
-        'FlutterError.onError', details.exception, details.stack,
-        attributes: {
-          'error.source': 'flutter_error',
-          'error.type': details.exception.runtimeType.toString(),
-        });
+    // Report error to both spans and metrics (only after OTel is initialized)
+    try {
+      FlutterOTel.reportError(
+          'FlutterError.onError', details.exception, details.stack,
+          attributes: {
+            'error.source': 'flutter_error',
+            'error.type': details.exception.runtimeType.toString(),
+          });
+    } catch (e) {
+      // If OTel isn't initialized yet, just log locally
+      if (kDebugMode) {
+        debugPrint('OTel not ready for error reporting: $e');
+      }
+    }
   };
 
   runZonedGuarded(() async {
@@ -43,8 +49,7 @@ void main() async {
 
     ///Flutterrific OTel initialization
     var sessionId = DateTime.now(); //synthetic session id
-    final deviceInfoPlugin = DeviceInfoPlugin();
-    final deviceInfo = await deviceInfoPlugin.iosInfo;
+    //final deviceInfoPlugin = DeviceInfoPlugin();
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
@@ -55,22 +60,29 @@ void main() async {
 
     // Create a manual periodic exporter that will flush metrics immediately
     final otlpMetricExporter = OtlpGrpcMetricExporter(
-      OtlpGrpcMetricExporterConfig(
-        endpoint: endpoint,
-        insecure: !secure,
-      ),
-    );
+        OtlpGrpcMetricExporterConfig(
+          endpoint: OTelConfig.endpoint,
+          insecure: !OTelConfig.secure,
+        ),
+      );
 
     // Configure a periodic manual reader with very short interval for mobile
     final metricReader = PeriodicExportingMetricReader(
-      otlpMetricExporter,
-      interval: Duration(seconds: 1), // Export every second
-    );
+        otlpMetricExporter,
+        interval: Duration(seconds: 5), // TODO config
+      );
+
+
+    // Print configuration for debugging
+    OTelConfig.printConfig();
+    if (kDebugMode) {
+      debugPrint('Using ${kIsWeb ? 'HTTP' : 'gRPC'} exporter for ${kIsWeb ? 'web' : 'native'} platform');
+    }
 
     await FlutterOTel.initialize(
         serviceName: 'wondrous-flutterotel',
-        endpoint: endpoint,
-        secure: secure,
+        endpoint: kIsWeb ? 'http://localhost:4318' : OTelConfig.endpoint,
+        secure: OTelConfig.secure,
         serviceVersion: '1.0.0',
         //configures the default trace, consider making other tracers for isolates, etc.
         tracerName: 'ui',
@@ -88,17 +100,12 @@ void main() async {
           //--dart-define environment=dev
           //See https://opentelemetry.io/docs/specs/semconv/resource/deployment-environment/
           EnvironmentResource.deploymentEnvironment.key: 'dev',
-          DeviceSemantics.deviceId.key:
-              deviceInfo.identifierForVendor ?? 'no_id',
-          DeviceSemantics.deviceModel.key: deviceInfo.model,
-          DeviceSemantics.devicePlatform.key: deviceInfo.systemName,
-          DeviceSemantics.deviceOsVersion.key: deviceInfo.systemVersion,
-          DeviceSemantics.deviceModel.key: deviceInfo.isiOSAppOnMac,
-          DeviceSemantics.isPhysicalDevice.key: deviceInfo.isPhysicalDevice,
+          // TODO ...await resourcesForDeviceInfo(deviceInfoPlugin),
           AppInfoSemantics.appName.key: packageInfo.appName,
           AppInfoSemantics.appPackageName.key: packageInfo.packageName,
           AppInfoSemantics.appVersion.key: packageInfo.version,
           AppInfoSemantics.appBuildNumber.key: packageInfo.buildNumber,
+          'platform': kIsWeb ? 'web' : Platform.operatingSystem,
         }.toAttributes(),
         commonAttributesFunction: () => <String, Object>{
               // These attributes will usually change over time in a real app,
@@ -113,29 +120,115 @@ void main() async {
     // Initialize services
     registerSingletons();
 
-    // Set up a periodic timer to flush metrics every few seconds
-    Timer.periodic(Duration(seconds: 5), (_) {
+    // Send initial test metric to verify connection
+    Timer(Duration(seconds: 2), () {
+      if (kDebugMode) {
+        debugPrint('Sending initial test metric...');
+      }
+      try {
+        // TODO FlutterOTel.reportPerformanceMetric(
+        // TODO - string attr names (both places)
+        FlutterMetricReporter().reportPerformanceMetric(
+          'app_startup_test',
+          Duration(milliseconds: 100),
+          attributes: {
+            'test': true,
+            'platform': kIsWeb ? 'web' : Platform.operatingSystem,
+            'startup_phase': 'initialization_complete',
+          },
+        );
+        
+        // Force flush to ensure the test metric is sent immediately
+        OTel.meterProvider().forceFlush();
+        
+        if (kDebugMode) {
+          debugPrint('Test metric sent and flushed');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Failed to send test metric: $e');
+        }
+      }
+    });
+
+    // Set up a periodic timer to flush metrics (less frequent for production)
+    Timer.periodic(Duration(seconds: 10), (_) {
       if (OTelLog.isLogMetrics()) {
         OTelLog.logMetric("Periodic metrics flush");
       }
-      OTel.meterProvider().forceFlush();
+      try {
+        OTel.meterProvider().forceFlush();
+        OTel.tracerProvider().forceFlush();
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Error during periodic flush: $e');
+        }
+      }
     });
 
     runApp(WondersApp());
     await appLogic.bootstrap();
 
     // Remove splash screen when bootstrap is complete
-    FlutterNativeSplash.remove();
+    if (!kIsWeb) {
+      FlutterNativeSplash.remove();
+    }
   }, (error, stack) {
     if (kDebugMode) {
       debugPrint('$error');
       debugPrintStack(stackTrace: stack, label: 'Flutter app runZoneGuarded');
     }
-    FlutterOTel.reportError('Error caught in run', error, stack, attributes: {
-      'error.source': 'zone_error',
-      'error.type': error.runtimeType.toString(),
-    });
+    try {
+      FlutterOTel.reportError('Error caught in run', error, stack, attributes: {
+        'error.source': 'zone_error',
+        'error.type': error.runtimeType.toString(),
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Failed to report zone error to OTel: $e');
+      }
+    }
   });
+}
+
+Future<Map<String, Object>> resourcesForDeviceInfo(DeviceInfoPlugin deviceInfoPlugin) async {
+  try {
+    if (!kIsWeb) {
+      if (Platform.isIOS) {
+        final deviceInfo = await deviceInfoPlugin.iosInfo;
+        return {
+          DeviceSemantics.deviceId.key: deviceInfo.identifierForVendor ?? 'no_id',
+          DeviceSemantics.deviceModel.key: deviceInfo.model,
+          DeviceSemantics.devicePlatform.key: deviceInfo.systemName,
+          DeviceSemantics.deviceOsVersion.key: deviceInfo.systemVersion,
+          DeviceSemantics.isPhysicalDevice.key: deviceInfo.isPhysicalDevice,
+        };
+      } else if (Platform.isAndroid) {
+        final deviceInfo = await deviceInfoPlugin.androidInfo;
+        return {
+          DeviceSemantics.deviceId.key: deviceInfo.id,
+          DeviceSemantics.deviceModel.key: deviceInfo.model,
+          DeviceSemantics.devicePlatform.key: deviceInfo.hardware,
+          DeviceSemantics.deviceOsVersion.key: deviceInfo.version.release,
+          DeviceSemantics.isPhysicalDevice.key: deviceInfo.isPhysicalDevice,
+        };
+      }
+    } else {
+      // Web platform device info
+      final deviceInfo = await deviceInfoPlugin.webBrowserInfo;
+      return {
+        DeviceSemantics.devicePlatform.key: 'web',
+        'browser.name': deviceInfo.browserName?.toString() ?? 'unknown',
+        'browser.version': deviceInfo.appVersion ?? 'unknown',
+        'user_agent': deviceInfo.userAgent ?? 'unknown',
+      };
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      debugPrint('Failed to get device info: $e');
+    }
+  }
+  return {};
 }
 
 /// Creates an app using the [MaterialApp.router] constructor and the global `appRouter`, an instance of [GoRouter].
@@ -149,23 +242,55 @@ class WondersApp extends StatefulWidget with GetItStatefulWidgetMixin {
 class _WondersAppState extends State<WondersApp> with GetItStateMixin {
   @override
   void initState() {
-    if (kIsWeb) {
-      appLogic.precacheWonderImages(context);
-    }
     super.initState();
+    
+    // Only precache on web, and handle errors gracefully
+    if (kIsWeb) {
+      try {
+        appLogic.precacheWonderImages(context);
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Error precaching images: $e');
+        }
+      }
+    }
+    
+    // Send app launch metric
+    Timer(Duration(milliseconds: 500), () {
+      try {
+        FlutterMetricReporter().reportPerformanceMetric(
+          'app_widget_init',
+          Duration(milliseconds: 500),
+          attributes: {
+            'widget': 'WondersApp',
+            'platform': kIsWeb ? 'web' : (Platform.isAndroid ? 'android' : 'ios'),
+          },
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Failed to report app init metric: $e');
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
-    //TODO - should be a mixin or a widget or hidden in FlutterOTel something simpler
-    MetricsService.dispose();
+    try {
+      //TODO - should be a mixin or a widget or hidden in FlutterOTel something simpler
+      MetricsService.dispose();
 
-    // Force flush before disposing to ensure all metrics are sent
-    OTel.meterProvider().forceFlush();
-    OTel.tracerProvider().forceFlush();
+      // Force flush before disposing to ensure all metrics are sent
+      OTel.meterProvider().forceFlush();
+      OTel.tracerProvider().forceFlush();
 
-    if (OTelLog.isLogMetrics()) {
-      OTelLog.logMetric("Flushing metrics before app dispose");
+      if (OTelLog.isLogMetrics()) {
+        OTelLog.logMetric("Flushing metrics before app dispose");
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error during app dispose: $e');
+      }
     }
 
     super.dispose();

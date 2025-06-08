@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/logic/common/platform_info.dart';
 import 'package:wonders/ui/common/modals/fullscreen_video_viewer.dart';
 import 'package:wonders/ui/common/utils/page_routes.dart';
+
+// Conditional import to avoid web issues
+import 'package:desktop_window/desktop_window.dart' 
+    if (dart.library.html) 'web_stub.dart' as desktop_window;
 
 class AppLogic {
   Size _appSize = Size.zero;
@@ -34,10 +37,14 @@ class AppLogic {
   /// Loads settings, sets up services etc.
   Future<void> bootstrap() async {
     debugPrint('bootstrap start...');
-    // Set min-sizes for desktop apps
-    // TODO: Test on Linux and confirm whether it's safe to call there, according to issue #183 its not.
-    if (PlatformInfo.isWindows || PlatformInfo.isMacOS) {
-      await DesktopWindow.setMinWindowSize($styles.sizes.minAppSize);
+    
+    // Set min-sizes for desktop apps (but not for web)
+    if (!kIsWeb && (PlatformInfo.isWindows || PlatformInfo.isMacOS)) {
+      try {
+        await desktop_window.DesktopWindow.setMinWindowSize($styles.sizes.minAppSize);
+      } catch (e) {
+        debugPrint('Failed to set min window size: $e');
+      }
     }
 
     if (kIsWeb) {

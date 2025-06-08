@@ -17,7 +17,7 @@
 		297F6FD12AD06E0F00FF159E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 297F6FD02AD06E0F00FF159E /* Assets.xcassets */; };
 		297F6FD32AD06E0F00FF159E /* WonderousWidget.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 297F6FCF2AD06E0D00FF159E /* WonderousWidget.intentdefinition */; };
 		297F6FD42AD06E0F00FF159E /* WonderousWidget.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 297F6FCF2AD06E0D00FF159E /* WonderousWidget.intentdefinition */; };
-		297F6FD72AD06E0F00FF159E /* Wonderous WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 297F6FC52AD06E0D00FF159E /* Wonderous WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		297F6FD72AD06E0F00FF159E /* WonderousWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 297F6FC52AD06E0D00FF159E /* WonderousWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		297FD5742AE18011008D8BFE /* WonderousWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 297FD5732AE18011008D8BFE /* WonderousWidgetView.swift */; };
 		297FD5762AE19BD9008D8BFE /* WonderWidgetViewComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 297FD5752AE19BD9008D8BFE /* WonderWidgetViewComponents.swift */; };
 		323DE3CFA8490EAB3C4E249C /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A44ACC5DE81A9C3E5BDA151 /* Pods_Runner.framework */; };
@@ -52,7 +52,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				297F6FD72AD06E0F00FF159E /* Wonderous WidgetExtension.appex in Embed Foundation Extensions */,
+				297F6FD72AD06E0F00FF159E /* WonderousWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -75,7 +75,7 @@
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		296251242AE7410D00D574FF /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		2978ECDC2B62D00C00E36CE8 /* FlutterAssets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlutterAssets.swift; sourceTree = "<group>"; };
-		297F6FC52AD06E0D00FF159E /* Wonderous WidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; name = "Wonderous WidgetExtension.appex"; path = WonderousWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		297F6FC52AD06E0D00FF159E /* WonderousWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WonderousWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		297F6FC62AD06E0D00FF159E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		297F6FC82AD06E0D00FF159E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		297F6FCB2AD06E0D00FF159E /* WonderousWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WonderousWidgetBundle.swift; sourceTree = "<group>"; };
@@ -187,7 +187,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				E214FC8227C5A18D005F78FB /* wondersUITests.xctest */,
-				297F6FC52AD06E0D00FF159E /* Wonderous WidgetExtension.appex */,
+				297F6FC52AD06E0D00FF159E /* WonderousWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -235,7 +235,7 @@
 			);
 			name = WonderousWidgetExtension;
 			productName = WonderousWidgetExtension;
-			productReference = 297F6FC52AD06E0D00FF159E /* Wonderous WidgetExtension.appex */;
+			productReference = 297F6FC52AD06E0D00FF159E /* WonderousWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 		97C146ED1CF9000F007C117D /* Runner */ = {
@@ -608,7 +608,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S3TL5AY6Y3;
+				DEVELOPMENT_TEAM = 2FCL8DARTZ;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WonderousWidget/Info.plist;
@@ -623,7 +623,7 @@
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.gskinner.flutter.wonders.Wonderous-Widget";
+				PRODUCT_BUNDLE_IDENTIFIER = com.gskinner.flutter.wonders.WonderousWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -648,7 +648,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S3TL5AY6Y3;
+				DEVELOPMENT_TEAM = 2FCL8DARTZ;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WonderousWidget/Info.plist;
@@ -662,7 +662,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.gskinner.flutter.wonders.Wonderous-Widget";
+				PRODUCT_BUNDLE_IDENTIFIER = com.gskinner.flutter.wonders.WonderousWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -685,7 +685,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S3TL5AY6Y3;
+				DEVELOPMENT_TEAM = 2FCL8DARTZ;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Wonderous Widget/Info.plist";
@@ -699,7 +699,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.gskinner.flutter.wonders.Wonderous-Widget";
+				PRODUCT_BUNDLE_IDENTIFIER = com.gskinner.flutter.wonders.WonderousWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
