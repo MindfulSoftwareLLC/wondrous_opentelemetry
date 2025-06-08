@@ -49,7 +49,6 @@ void main() async {
 
     ///Flutterrific OTel initialization
     var sessionId = DateTime.now(); //synthetic session id
-    //final deviceInfoPlugin = DeviceInfoPlugin();
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
@@ -58,20 +57,44 @@ void main() async {
     OTelLog.exportLogFunction = debugPrint;
     OTelLog.spanLogFunction = debugPrint;
 
-    // Create a manual periodic exporter that will flush metrics immediately
-    final otlpMetricExporter = OtlpGrpcMetricExporter(
+    // Platform-specific metric exporter configuration
+    late final MetricExporter otlpMetricExporter;
+    late final MetricReader metricReader;
+
+    if (kIsWeb) {
+      // Web platform - use HTTP exporter
+      // Use the base endpoint - exporter will add /v1/metrics automatically
+      debugPrint('🌐 WEB PLATFORM: Creating HTTP exporter for ${OTelConfig.endpoint}');
+      otlpMetricExporter = OtlpHttpMetricExporter(
+        OtlpHttpMetricExporterConfig(
+          endpoint: OTelConfig.endpoint,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        ),
+      );
+      
+      // Shorter interval for web testing
+      metricReader = PeriodicExportingMetricReader(
+        otlpMetricExporter,
+        interval: Duration(seconds: 5), // Export every 5 seconds for web
+      );
+    } else {
+      // Mobile/Desktop - use gRPC exporter
+      debugPrint('📱 NATIVE PLATFORM: Creating gRPC exporter');
+      otlpMetricExporter = OtlpGrpcMetricExporter(
         OtlpGrpcMetricExporterConfig(
           endpoint: OTelConfig.endpoint,
           insecure: !OTelConfig.secure,
         ),
       );
 
-    // Configure a periodic manual reader with very short interval for mobile
-    final metricReader = PeriodicExportingMetricReader(
+      metricReader = PeriodicExportingMetricReader(
         otlpMetricExporter,
-        interval: Duration(seconds: 5), // TODO config
+        interval: Duration(seconds: 3), // Export every 3 seconds for mobile
       );
-
+    }
 
     // Print configuration for debugging
     OTelConfig.printConfig();
@@ -81,7 +104,7 @@ void main() async {
 
     await FlutterOTel.initialize(
         serviceName: 'wondrous-flutterotel',
-        endpoint: kIsWeb ? 'http://localhost:4318' : OTelConfig.endpoint,
+        endpoint: OTelConfig.endpoint, // Use configured endpoint for all platforms
         secure: OTelConfig.secure,
         serviceVersion: '1.0.0',
         //configures the default trace, consider making other tracers for isolates, etc.
